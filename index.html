@@ -277,29 +277,105 @@ const SHEET_API="https://api.sheetbest.com/sheets/1b49c5c2-ff03-4fba-acb9-91e9c2
 const OFFLINE_KEY="event_order_queue";
 
 /* ===== MENU DATA (UNCHANGED) ===== */
-const categories=[
-{title:"🍷 Red Wine",wine:true,items:[
-{code:"RW1",name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge",glass:450,bottle:2100},
-{code:"RW2",name:"Poliziano In Violas Cortona Merlot D.O.C",glass:350,bottle:1900},
-{code:"RW3",name:"J. Lohr Seven Oaks Cabernet Sauvignon",glass:350,bottle:1800},
-{code:"RW4",name:"Chateau Les Clavelines Saint Emilion Grand Cru",glass:350,bottle:1600},
-{code:"RW5",name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP",glass:350,bottle:1600},
-{code:"RW6",name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP",glass:350,bottle:1600},
-{code:"RW7",name:"Chateau La Gasquerie AOP Bordeaux Rouge",glass:250,bottle:1300},
-{code:"RW8",name:"Chateau Pericou AOP Bordeaux Rouge",glass:250,bottle:1300}
-]},
-{title:"🍾 White Wine",wine:true,items:[
-{code:"WW1",name:"Greywacke Wild Sauvignon",glass:350,bottle:1800},
-{code:"WW2",name:"Karthäuserhof Bruno Riesling Dry",glass:350,bottle:1700},
-{code:"WW3",name:"Robert Mondavi Private Selection Vintage Chardonnay",glass:250,bottle:1500}
-]},
-{title:"🥂 Sparkling & Rosé",wine:true,items:[
-{code:"SP1",name:"Champagne Alain Navarre Cuvée Tradition Brut",glass:350,bottle:1800},
-{code:"SP2",name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato",glass:250,bottle:1500},
-{code:"SP3",name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut",glass:250,bottle:1500},
-{code:"RS1",name:"Domaines Ott By Ott Rosé",glass:350,bottle:1600}
-]}
+const categories = [
+
+/* ================= WINE-NOW ================= */
+
+{
+  title: "🍷 Red Wine",
+  wine: true,
+  items: [
+    { code:"RW1", name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge", glass:450, bottle:2100 },
+    { code:"RW2", name:"Poliziano In Violas Cortona Merlot D.O.C", glass:350, bottle:1900 },
+    { code:"RW3", name:"J. Lohr Seven Oaks Cabernet Sauvignon", glass:350, bottle:1800 },
+    { code:"RW4", name:"Chateau Les Clavelines Saint Emilion Grand Cru", glass:350, bottle:1600 },
+    { code:"RW5", name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
+    { code:"RW6", name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
+    { code:"RW7", name:"Chateau La Gasquerie AOP Bordeaux Rouge", glass:250, bottle:1300 },
+    { code:"RW8", name:"Chateau Pericou AOP Bordeaux Rouge", glass:250, bottle:1300 }
+  ]
+},
+
+{
+  title: "🍾 White Wine",
+  wine: true,
+  items: [
+    { code:"WW1", name:"Greywacke Wild Sauvignon", glass:350, bottle:1800 },
+    { code:"WW2", name:"Karthäuserhof Bruno Riesling Dry", glass:350, bottle:1700 },
+    { code:"WW3", name:"Robert Mondavi Private Selection Vintage Chardonnay", glass:250, bottle:1500 }
+  ]
+},
+
+{
+  title: "🥂 Sparkling & Rosé",
+  wine: true,
+  items: [
+    { code:"SP1", name:"Champagne Alain Navarre Cuvée Tradition Brut", glass:350, bottle:1800 },
+    { code:"SP2", name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato", glass:250, bottle:1500 },
+    { code:"SP3", name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut", glass:250, bottle:1500 },
+    { code:"RS1", name:"Domaines Ott By Ott Rosé", glass:350, bottle:1600 }
+  ]
+},
+
+/* ================= LIQ9 ================= */
+
+{
+  title: "🥃 Whisky",
+  items: [
+    { code:"LW1", name:"Kyoto Whisky Kuro-Obi", glass:300, bottle:2200 },
+    { code:"LW2", name:"Monkey Shoulder Blended Malt", glass:250, bottle:2100 }
+  ]
+},
+
+{
+  title: "🍸 Gin",
+  items: [
+    { code:"LG1", name:"Sipsmith London Dry", glass:400, bottle:2800 },
+    { code:"LG2", name:"Monkey 47 Dry Gin", glass:400, bottle:2800 },
+    { code:"LG3", name:"Inchon Esprit Des Champs Gin", glass:200, bottle:1400 }
+  ]
+},
+
+{
+  title: "🍹 Liqueur / Aperitif",
+  items: [
+    { code:"LL1", name:"Aperol", glass:300, bottle:1500 },
+    { code:"LL2", name:"Amaro Montenegro", glass:250, bottle:1900 }
+  ]
+},
+
+{
+  title: "🔥 Feature Spirits",
+  items: [
+    { code:"LB1", name:"H by Hine VSOP", glass:350, bottle:3000 },
+    { code:"LT1", name:"Dos Companeros Silver Tequila", glass:250, bottle:1700 },
+    { code:"LV1", name:"Buss N°One Vodka", glass:250, bottle:2400 },
+    { code:"LV2", name:"Suntory Haku Vodka", glass:250, bottle:2000 },
+    { code:"LR1", name:"Chalong Bay Rum", glass:200, bottle:1400 }
+  ]
+},
+
+/* ================= NON-ALCOHOL ================= */
+
+{
+  title: "🥤 Non-Alcohol & NA",
+  items: [
+    { code:"NS1", name:"Mont Étoile Natural Mineral Water (500 ml) (PET)", glass:40, bottle:40 },
+    { code:"NS2", name:"SCHWEPPES Soda Water", glass:40, bottle:40 },
+    { code:"NS3", name:"SCHWEPPES Tonic Water", glass:40, bottle:40 },
+    { code:"NS4", name:"Coke", glass:40, bottle:40 },
+    { code:"NS5", name:"Spritz", glass:40, bottle:40 },
+
+    { code:"NW1", name:"Enjoy It NA Cabernet", glass:300, bottle:1485 },
+    { code:"NW2", name:"Enjoy It NA Sauvignon Blanc", glass:300, bottle:1485 },
+    { code:"NW3", name:"Enjoy It NA Sparkling", glass:300, bottle:1485 },
+
+    { code:"NL1", name:"Sober Spirits Gin", glass:350, bottle:2999 }
+  ]
+}
+
 ];
+
 
 let all=[];
 const menu=document.getElementById("menu");
