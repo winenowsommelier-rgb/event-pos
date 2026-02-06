@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wine-Now & LIQ9 Event POS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --ink:#111;
+  --muted:#666;
+  --wine:#7a1f2b;
+  --border:#e5e7eb;
+  --success:#2e7d32;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  background:var(--bg);
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:16px;
+}
+h1{margin:0 0 12px;font-size:22px}
+
+.header{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:space-between;
+  align-items:center;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+select,label{
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:#fff;
+  font-size:14px;
+}
+.section{margin-top:22px}
+.section-title{
+  font-size:17px;
+  font-weight:700;
+  border-bottom:2px solid var(--border);
+  padding-bottom:6px;
+  margin-bottom:8px;
+}
+.section.wine .section-title{
+  color:var(--wine);
+  border-color:var(--wine);
+}
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  vertical-align:top;
+}
+th{color:var(--muted)}
+.item-code{
+  background:var(--wine);
+  color:#fff;
+  font-weight:800;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  margin-right:6px;
+  display:inline-block;
+  min-width:44px;
+  text-align:center;
+}
+.price{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+.qty-row{
+  display:flex;
+  gap:10px;
+  margin-top:6px;
+  flex-wrap:wrap;
+}
+.qty-box{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.qty-btn{
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  border:1px solid var(--border);
+  background:#f1f3f5;
+  font-weight:800;
+}
+.qty-input{
+  width:36px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:6px;
+  font-weight:700;
+  background:#fff;
+}
+
+.sticky-summary{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  border-top:2px solid var(--border);
+  padding:14px;
+  margin-top:24px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  z-index:99;
+}
+.summary{
+  background:#fafafa;
+  border-radius:10px;
+  padding:10px;
+  text-align:center;
+}
+.summary strong{font-size:16px}
+
+button{
+  width:100%;
+  padding:14px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn-update{background:#000;color:#fff;margin-top:14px}
+.btn-submit{background:var(--success);color:#fff;margin-top:12px}
+
+#orderSummary{
+  margin-top:14px;
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  display:none;
+}
+.offline{
+  margin-top:10px;
+  background:#f59e0b;
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  display:none;
+  text-align:center;
+}
+
+@media(max-width:768px){
+  th{display:none}
+  tr{display:block;padding:10px}
+  td{display:flex;justify-content:space-between;padding:6px 0}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🍷 Wine-Now & LIQ9 Event POS</h1>
+    <div class="controls">
+      <select id="staff">
+        <option value="">Staff</option>
+        <option>staff1</option>
+        <option>staff2</option>
+        <option>staff3</option>
+        <option>staff4</option>
+      </select>
+      <label>
+        <input type="checkbox" id="member"> Member −25%
+      </label>
+    </div>
+  </div>
+
+  <div id="menu"></div>
+
+  <div class="sticky-summary">
+    <div class="summary">Items<br><strong id="items">0</strong></div>
+    <div class="summary">Subtotal<br><strong>฿<span id="subtotal">0</span></strong></div>
+    <div class="summary">Discount<br><strong>฿<span id="discount">0</span></strong></div>
+    <div class="summary">Total<br><strong>฿<span id="final">0</span></strong></div>
+  </div>
+
+  <button class="btn-update" onclick="updateSummary()">UPDATE</button>
+
+  <div id="orderSummary"></div>
+  <div class="offline" id="offline">Offline – order queued</div>
+</div>
+
+<script>
+const SHEET_API="https://api.sheetbest.com/sheets/1b49c5c2-ff03-4fba-acb9-91e9c280073d";
+const OFFLINE_KEY="event_order_queue";
+
+/* === FULL MENU DATA (UNCHANGED) === */
+const categories=[
+{title:"🍷 Red Wine",wine:true,items:[
+{code:"RW1",name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge",glass:450,bottle:2100},
+{code:"RW2",name:"Poliziano In Violas Cortona Merlot D.O.C",glass:350,bottle:1900},
+{code:"RW3",name:"J. Lohr Seven Oaks Cabernet Sauvignon",glass:350,bottle:1800},
+{code:"RW4",name:"Chateau Les Clavelines Saint Emilion Grand Cru",glass:350,bottle:1600},
+{code:"RW5",name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP",glass:350,bottle:1600},
+{code:"RW6",name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP",glass:350,bottle:1600},
+{code:"RW7",name:"Chateau La Gasquerie AOP Bordeaux Rouge",glass:250,bottle:1300},
+{code:"RW8",name:"Chateau Pericou AOP Bordeaux Rouge",glass:250,bottle:1300}
+]},
+{title:"🍾 White Wine",wine:true,items:[
+{code:"WW1",name:"Greywacke Wild Sauvignon",glass:350,bottle:1800},
+{code:"WW2",name:"Karthäuserhof Bruno Riesling Dry",glass:350,bottle:1700},
+{code:"WW3",name:"Robert Mondavi Private Selection Vintage Chardonnay",glass:250,bottle:1500}
+]},
+{title:"🥂 Sparkling & Rosé",wine:true,items:[
+{code:"SP1",name:"Champagne Alain Navarre Cuvée Tradition Brut",glass:350,bottle:1800},
+{code:"SP2",name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato",glass:250,bottle:1500},
+{code:"SP3",name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut",glass:250,bottle:1500},
+{code:"RS1",name:"Domaines Ott By Ott Rosé",glass:350,bottle:1600}
+]},
+{title:"🥃 Whisky",items:[
+{code:"LW1",name:"Kyoto Whisky Kuro-Obi",glass:300,bottle:2200},
+{code:"LW2",name:"Monkey Shoulder Blended Malt",glass:250,bottle:2100}
+]},
+{title:"🍸 Gin",items:[
+{code:"LG1",name:"Sipsmith London Dry",glass:400,bottle:2800},
+{code:"LG2",name:"Monkey 47 Dry Gin",glass:400,bottle:2800},
+{code:"LG3",name:"Inchon Esprit Des Champs Gin",glass:200,bottle:1400}
+]},
+{title:"🍹 Liqueur / Aperitif",items:[
+{code:"LL1",name:"Aperol",glass:300,bottle:1500},
+{code:"LL2",name:"Amaro Montenegro",glass:250,bottle:1900}
+]},
+{title:"🔥 Feature Spirits",items:[
+{code:"LB1",name:"H by Hine VSOP",glass:350,bottle:3000},
+{code:"LT1",name:"Dos Companeros Silver Tequila",glass:250,bottle:1700},
+{code:"LV1",name:"Buss N°One Vodka",glass:250,bottle:2400},
+{code:"LV2",name:"Suntory Haku Vodka",glass:250,bottle:2000},
+{code:"LR1",name:"Chalong Bay Rum",glass:200,bottle:1400}
+]},
+{title:"🥤 Non-Alcohol & NA",items:[
+{code:"NS1",name:"Mont Étoile Natural Mineral Water (500 ml)",glass:40,bottle:40},
+{code:"NS2",name:"SCHWEPPES Soda Water",glass:40,bottle:40},
+{code:"NS3",name:"SCHWEPPES Tonic Water",glass:40,bottle:40},
+{code:"NS4",name:"Coke",glass:40,bottle:40},
+{code:"NS5",name:"Spritz",glass:40,bottle:40},
+{code:"NW1",name:"Enjoy It NA Cabernet",glass:300,bottle:1485},
+{code:"NW2",name:"Enjoy It NA Sauvignon Blanc",glass:300,bottle:1485},
+{code:"NW3",name:"Enjoy It NA Sparkling",glass:300,bottle:1485},
+{code:"NL1",name:"Sober Spirits Gin",glass:350,bottle:2999},
+{code:"NL2",name:"Sober Spirits Whisky",glass:350,bottle:2999}
+]}
+];
+
+let all=[];
+const menu=document.getElementById("menu");
+
+/* === RENDER MENU === */
+categories.forEach(cat=>{
+  menu.innerHTML+=`
+  <div class="section ${cat.wine?'wine':''}">
+    <div class="section-title">${cat.title}</div>
+    <div class="card"><table>
+      <tr><th>Item</th><th>Qty</th></tr>`;
+  cat.items.forEach(it=>{
+    const i=all.length;
+    all.push(it);
+    menu.innerHTML+=`
+    <tr>
+      <td>
+        <span class="item-code">${it.code}</span>${it.name}
+        <div class="price">฿${it.glass} / glass · ฿${it.bottle} / bottle</div>
+      </td>
+      <td>
+        <div class="qty-row">
+          <div class="qty-box">G
+            <button class="qty-btn" onclick="chg(${i},'g',-1)">−</button>
+            <input class="qty-input" id="g${i}" value="0" readonly>
+            <button class="qty-btn" onclick="chg(${i},'g',1)">+</button>
+          </div>
+          <div class="qty-box">B
+            <button class="qty-btn" onclick="chg(${i},'b',-1)">−</button>
+            <input class="qty-input" id="b${i}" value="0" readonly>
+            <button class="qty-btn" onclick="chg(${i},'b',1)">+</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  });
+  menu.innerHTML+=`</table></div></div>`;
+});
+
+/* === LOGIC === */
+function chg(i,t,d){
+  const el=document.getElementById(t+i);
+  el.value=Math.max(0,+el.value+d);
+  liveUpdate();
+}
+
+function liveUpdate(){
+  let items=0,sub=0;
+  all.forEach((m,i)=>{
+    const g=+document.getElementById("g"+i).value;
+    const b=+document.getElementById("b"+i).value;
+    items+=g+b;
+    sub+=g*m.glass+b*m.bottle;
+  });
+  const disc=document.getElementById("member").checked?sub*0.25:0;
+  document.getElementById("items").innerText=items;
+  document.getElementById("subtotal").innerText=sub;
+  document.getElementById("discount").innerText=disc;
+  document.getElementById("final").innerText=sub-disc;
+}
+
+function updateSummary(){
+  const staff=document.getElementById("staff").value;
+  if(!staff){alert("Select staff");return;}
+  let list=[],items=0,sub=0;
+  all.forEach((m,i)=>{
+    const g=+document.getElementById("g"+i).value;
+    const b=+document.getElementById("b"+i).value;
+    if(g||b){
+      list.push(`${m.code} G:${g} B:${b}`);
+      items+=g+b;
+      sub+=g*m.glass+b*m.bottle;
+    }
+  });
+  const disc=document.getElementById("member").checked?sub*0.25:0;
+  const total=sub-disc;
+  const payload={
+    timestamp:new Date().toLocaleString(),
+    order_id:"EVT-"+Date.now(),
+    staff,
+    total_items:items,
+    subtotal:sub,
+    discount:disc,
+    final_total:total,
+    member:document.getElementById("member").checked?"YES":"NO",
+    order_detail:list.join(", ")
+  };
+  const box=document.getElementById("orderSummary");
+  box.style.display="block";
+  box.innerHTML=`
+    <h3>Order Summary</h3>
+    <p><strong>${staff}</strong></p>
+    <p>${list.join("<br>")||"No items"}</p>
+    <p><strong>Total ฿${total}</strong></p>
+    <button class="btn-submit" onclick='submitOrder(${JSON.stringify(payload)})'>SUBMIT ORDER</button>`;
+}
+
+function submitOrder(p){
+  fetch(SHEET_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)})
+  .then(()=>location.reload())
+  .catch(()=>{
+    const q=JSON.parse(localStorage.getItem(OFFLINE_KEY)||"[]");
+    q.push(p);
+    localStorage.setItem(OFFLINE_KEY,JSON.stringify(q));
+    document.getElementById("offline").style.display="block";
+  });
+}
+
+window.addEventListener("online",()=>{
+  const q=JSON.parse(localStorage.getItem(OFFLINE_KEY)||"[]");
+  q.forEach(p=>fetch(SHEET_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}));
+  localStorage.removeItem(OFFLINE_KEY);
+  document.getElementById("offline").style.display="none";
+});
+</script>
+</body>
+</html>
