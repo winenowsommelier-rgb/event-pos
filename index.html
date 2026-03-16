@@ -1,494 +1,426 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Wine-Now Event POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wine-Now / LIQ9 Product Intelligence Engine</title>
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --card: #ffffff;
+      --line: #e7e9ef;
+      --line-dark: #d9dce5;
+      --text: #151822;
+      --muted: #667085;
+      --accent: #651d32;
+      --accent-soft: #f7edf1;
+      --success: #0e9f6e;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+    }
 
-<style>
-/* ===== DESIGN SYSTEM ===== */
-:root{
-  --bg:#f7f7f8;
-  --card:#ffffff;
-  --ink:#111111;
-  --muted:#8a8a8a;
-  --border:#e6e6e9;
-  --accent:#7a1f2b;
-  --success:#1f7a3f;
-}
+    * { box-sizing: border-box; }
 
-*{box-sizing:border-box}
+    body {
+      margin: 0;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top right, #faf7f8 0%, var(--bg) 45%);
+      color: var(--text);
+    }
 
-body{
-  margin:0;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
-  color:var(--ink);
-}
+    .container {
+      max-width: 1180px;
+      margin: 28px auto;
+      padding: 0 18px 36px;
+      display: grid;
+      gap: 14px;
+    }
 
-/* ===== LAYOUT ===== */
-.app{
-  max-width:900px;
-  margin:auto;
-  padding:14px;
-}
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
 
-.header{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:14px;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
 
-.title{
-  font-size:20px;
-  font-weight:700;
-}
+    h1 { margin: 0; font-size: 23px; letter-spacing: -0.02em; }
+    h2 { margin: 4px 0 0; font-size: 14px; color: var(--muted); font-weight: 500; }
+    h3 { margin: 0 0 12px; font-size: 14px; color: #1f2433; letter-spacing: .01em; }
 
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
+    .badge {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+      border: 1px solid #f0d8e1;
+    }
 
-select,label{
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
-}
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
 
-/* ===== SECTIONS ===== */
-.section{
-  margin-top:22px;
-}
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-.section-title{
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:10px;
-  padding-bottom:6px;
-  border-bottom:2px solid var(--border);
-}
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 220px;
+    }
 
-.section.wine .section-title{
-  color:var(--accent);
-  border-color:var(--accent);
-}
+    label { font-size: 12px; color: var(--muted); font-weight: 600; }
 
-/* ===== ITEM CARD ===== */
-.item{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-}
+    input[type="file"], input[type="number"] {
+      border: 1px solid var(--line-dark);
+      border-radius: 10px;
+      background: #fff;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+    }
 
-.item-top{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #4d1026 0%, #7b2740 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .18s ease;
+      box-shadow: 0 6px 16px rgba(101, 29, 50, .25);
+    }
 
-.code{
-  background:var(--accent);
-  color:#fff;
-  font-weight:800;
-  font-size:12px;
-  padding:6px 8px;
-  border-radius:8px;
-  min-width:46px;
-  text-align:center;
-}
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
-.name{
-  font-size:14px;
-  font-weight:600;
-  line-height:1.3;
-}
+    .inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      color: #333c4d;
+      font-size: 13px;
+    }
 
-.price{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
 
-/* ===== QTY CONTROLS ===== */
-.qty{
-  display:flex;
-  gap:14px;
-  margin-top:10px;
-}
+    .progress-wrap { display: grid; gap: 10px; }
 
-.qty-block{
-  flex:1;
-  background:#fafafa;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px;
-  text-align:center;
-}
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--muted);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-.qty-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #eef1f5;
+      overflow: hidden;
+      border: 1px solid #e2e7ef;
+    }
 
-.qty-row{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-}
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #9b3556, #67172f);
+      transition: width .25s ease;
+    }
 
-.btn{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:18px;
-  font-weight:700;
-}
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+    }
 
-.qty-val{
-  width:36px;
-  text-align:center;
-  font-weight:700;
-}
+    .kpi {
+      border: 1px solid var(--line);
+      background: #fafbfc;
+      border-radius: 10px;
+      padding: 10px;
+    }
 
-/* ===== STICKY SUMMARY ===== */
-.summary-bar{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  border-top:2px solid var(--border);
-  margin-top:20px;
-  padding:12px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-}
+    .kpi .name { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .kpi .value { font-size: 16px; font-weight: 700; color: #1f2433; }
 
-.sum{
-  text-align:center;
-  font-size:12px;
-  color:var(--muted);
-}
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 330px;
+      background: #fff;
+    }
 
-.sum strong{
-  display:block;
-  font-size:15px;
-  color:var(--ink);
-}
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td {
+      border-bottom: 1px solid #edf0f5;
+      text-align: left;
+      padding: 9px 10px;
+      white-space: nowrap;
+      vertical-align: top;
+    }
+    th {
+      background: #fafbfc;
+      color: #515b70;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
 
-/* ===== ACTIONS ===== */
-.action{
-  margin-top:14px;
-}
+    .downloads {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-.update{
-  background:#111;
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-}
+    .link-btn {
+      text-decoration: none;
+      border: 1px solid var(--line-dark);
+      background: #fff;
+      color: #293042;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-.submit{
-  background:var(--success);
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-  margin-top:10px;
-}
+    .link-btn:hover { background: #fafbff; }
 
-.order-summary{
-  display:none;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-top:14px;
-}
+    .status-ok { color: var(--success); font-weight: 700; }
+    .status-warn { color: #c2410c; font-weight: 700; }
 
-.offline{
-  display:none;
-  background:#f59e0b;
-  color:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  margin-top:10px;
-}
-</style>
+    @media (max-width: 920px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .kpis { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+  </style>
 </head>
-
 <body>
-<div class="app">
+  <div class="container">
+    <section class="card header">
+      <div>
+        <h1>Wine-Now / LIQ9</h1>
+        <h2>Product Intelligence Engine</h2>
+      </div>
+      <div class="badge">AI Enrichment · Gemini + Web Context</div>
+    </section>
 
-  <div class="header">
-    <div class="title">🍷 Wine-Now / LIQ9 Event POS</div>
-    <div class="controls">
-      <select id="staff">
-        <option value="">Select Staff</option>
-        <option>staff1</option>
-        <option>staff2</option>
-        <option>staff3</option>
-        <option>staff4</option>
-      </select>
-      <label>
-        <input type="checkbox" id="member"> Member −25%
-      </label>
+    <div class="grid-2">
+      <section class="card">
+        <h3>1) Upload Dataset</h3>
+        <div class="row">
+          <div class="field">
+            <label>Product CSV file</label>
+            <input type="file" id="file" accept=".csv" />
+          </div>
+          <div class="field" style="min-width:120px;max-width:170px;">
+            <label>Batch size</label>
+            <input type="number" id="batchSize" value="20" min="1" />
+          </div>
+          <button class="btn" id="runBtn">Run AI Analysis</button>
+        </div>
+        <label class="inline"><input type="checkbox" id="useWeb" checked> Use internet scrape context (source_url / url / product_url / link)</label>
+        <div class="hint">Set server environment variable: <code>GEMINI_API_KEY=your_key</code>. If unavailable, fallback mode is used automatically.</div>
+      </section>
+
+      <section class="card progress-wrap">
+        <h3>2) Progress Monitor</h3>
+        <div class="progress-label">
+          <strong id="progressText">Progress: 0%</strong>
+          <span id="etaText">ETA: -</span>
+        </div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="kpis">
+          <div class="kpi"><div class="name">Processed</div><div class="value" id="processedVal">0 / 0</div></div>
+          <div class="kpi"><div class="name">Errors</div><div class="value" id="errorsVal">0</div></div>
+          <div class="kpi"><div class="name">Mode</div><div class="value" id="modeVal">-</div></div>
+          <div class="kpi"><div class="name">Status</div><div class="value status-warn" id="statusVal">Idle</div></div>
+        </div>
+      </section>
     </div>
+
+    <section class="card">
+      <h3>3) Live Result Preview</h3>
+      <div class="table-wrap">
+        <table id="previewTable">
+          <thead>
+            <tr>
+              <th>SKU</th><th>Product Name</th><th>Category</th><th>Style</th>
+              <th>Classification</th><th>Country</th><th>Region</th><th>Confidence</th><th>Remark</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>4) Download Results</h3>
+      <div class="downloads">
+        <a class="link-btn" id="outLink" href="#" download>Download Enriched CSV</a>
+        <a class="link-btn" id="logLink" href="#" download>Download Processing Log</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>5) Processing Logs</h3>
+      <div class="table-wrap" style="max-height:260px;">
+        <table id="logTable">
+          <thead>
+            <tr>
+              <th>Batch</th><th>SKU</th><th>Status</th><th>Confidence</th>
+              <th>Token Usage</th><th>Error / Warning</th><th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
   </div>
-
-  <div id="menu"></div>
-
-  <div class="summary-bar">
-    <div class="sum">Items<strong id="items">0</strong></div>
-    <div class="sum">Subtotal<strong>฿<span id="subtotal">0</span></strong></div>
-    <div class="sum">Discount<strong>฿<span id="discount">0</span></strong></div>
-    <div class="sum">Total<strong>฿<span id="final">0</span></strong></div>
-  </div>
-
-  <div class="action">
-    <button class="update" onclick="updateSummary()">UPDATE</button>
-  </div>
-
-  <div class="order-summary" id="orderSummary"></div>
-  <div class="offline" id="offline">Offline – order queued</div>
-
-</div>
 
 <script>
-/* ===== CONFIG ===== */
-const SHEET_API="https://api.sheetbest.com/sheets/1b49c5c2-ff03-4fba-acb9-91e9c280073d";
-const OFFLINE_KEY="event_order_queue";
+const runBtn = document.getElementById('runBtn');
 
-/* ===== MENU DATA (UNCHANGED) ===== */
-const categories = [
-
-/* ================= WINE-NOW ================= */
-
-{
-  title: "🍷 Red Wine",
-  wine: true,
-  items: [
-    { code:"RW1", name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge", glass:450, bottle:2100 },
-    { code:"RW2", name:"Poliziano In Violas Cortona Merlot D.O.C", glass:350, bottle:1900 },
-    { code:"RW3", name:"J. Lohr Seven Oaks Cabernet Sauvignon", glass:350, bottle:1800 },
-    { code:"RW4", name:"Chateau Les Clavelines Saint Emilion Grand Cru", glass:350, bottle:1600 },
-    { code:"RW5", name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW6", name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW7", name:"Chateau La Gasquerie AOP Bordeaux Rouge", glass:250, bottle:1300 },
-    { code:"RW8", name:"Chateau Pericou AOP Bordeaux Rouge", glass:250, bottle:1300 }
-  ]
-},
-
-{
-  title: "🍾 White Wine",
-  wine: true,
-  items: [
-    { code:"WW1", name:"Greywacke Wild Sauvignon", glass:350, bottle:1800 },
-    { code:"WW2", name:"Karthäuserhof Bruno Riesling Dry", glass:350, bottle:1700 },
-    { code:"WW3", name:"Robert Mondavi Private Selection Vintage Chardonnay", glass:250, bottle:1500 }
-  ]
-},
-
-{
-  title: "🥂 Sparkling & Rosé",
-  wine: true,
-  items: [
-    { code:"SP1", name:"Champagne Alain Navarre Cuvée Tradition Brut", glass:350, bottle:1800 },
-    { code:"SP2", name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato", glass:250, bottle:1500 },
-    { code:"SP3", name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut", glass:250, bottle:1500 },
-    { code:"RS1", name:"Domaines Ott By Ott Rosé", glass:350, bottle:1600 }
-  ]
-},
-
-/* ================= LIQ9 ================= */
-
-{
-  title: "🥃 Whisky",
-  items: [
-    { code:"LW1", name:"Kyoto Whisky Kuro-Obi", glass:300, bottle:2200 },
-    { code:"LW2", name:"Monkey Shoulder Blended Malt", glass:250, bottle:2100 }
-  ]
-},
-
-{
-  title: "🍸 Gin",
-  items: [
-    { code:"LG1", name:"Sipsmith London Dry", glass:400, bottle:2800 },
-    { code:"LG2", name:"Monkey 47 Dry Gin", glass:400, bottle:2800 },
-    { code:"LG3", name:"Inchon Esprit Des Champs Gin", glass:200, bottle:1400 }
-  ]
-},
-
-{
-  title: "🍹 Liqueur / Aperitif",
-  items: [
-    { code:"LL1", name:"Aperol", glass:300, bottle:1500 },
-    { code:"LL2", name:"Amaro Montenegro", glass:250, bottle:1900 }
-  ]
-},
-
-{
-  title: "🔥 Feature Spirits",
-  items: [
-    { code:"LB1", name:"H by Hine VSOP", glass:350, bottle:3000 },
-    { code:"LT1", name:"Dos Companeros Silver Tequila", glass:250, bottle:1700 },
-    { code:"LV1", name:"Buss N°One Vodka", glass:250, bottle:2400 },
-    { code:"LV2", name:"Suntory Haku Vodka", glass:250, bottle:2000 },
-    { code:"LR1", name:"Chalong Bay Rum", glass:200, bottle:1400 }
-  ]
-},
-
-/* ================= NON-ALCOHOL ================= */
-
-{
-  title: "🥤 Non-Alcohol & NA",
-  items: [
-    { code:"NS1", name:"Mont Étoile Natural Mineral Water (500 ml) (PET)", glass:40, bottle:40 },
-    { code:"NS2", name:"SCHWEPPES Soda Water", glass:40, bottle:40 },
-    { code:"NS3", name:"SCHWEPPES Tonic Water", glass:40, bottle:40 },
-    { code:"NS4", name:"Coke", glass:40, bottle:40 },
-    { code:"NS5", name:"Spritz", glass:40, bottle:40 },
-
-    { code:"NW1", name:"Enjoy It NA Cabernet", glass:300, bottle:1485 },
-    { code:"NW2", name:"Enjoy It NA Sauvignon Blanc", glass:300, bottle:1485 },
-    { code:"NW3", name:"Enjoy It NA Sparkling", glass:300, bottle:1485 },
-
-    { code:"NL1", name:"Sober Spirits Gin", glass:350, bottle:2999 }
-  ]
+function setProgress(data) {
+  const progress = Number(data.progress || 0);
+  document.getElementById('progressText').textContent = `Progress: ${progress}%`;
+  document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, progress))}%`;
+  document.getElementById('etaText').textContent = `ETA: ${data.estimated_completion || '-'}`;
+  document.getElementById('processedVal').textContent = `${data.processed || 0} / ${data.total || 0}`;
+  document.getElementById('errorsVal').textContent = `${data.error_count || 0}`;
 }
 
-];
+function setRunState(isRunning, finalData = null) {
+  runBtn.disabled = isRunning;
+  const statusEl = document.getElementById('statusVal');
+  const modeEl = document.getElementById('modeVal');
 
+  if (isRunning) {
+    statusEl.textContent = 'Running';
+    statusEl.className = 'value status-warn';
+    modeEl.textContent = document.getElementById('useWeb').checked ? 'Gemini + Web' : 'Gemini';
+    return;
+  }
 
-let all=[];
-const menu=document.getElementById("menu");
+  if (finalData) {
+    const hasErrors = Number(finalData.error_count || 0) > 0;
+    statusEl.textContent = hasErrors ? 'Completed with warnings' : 'Completed';
+    statusEl.className = hasErrors ? 'value status-warn' : 'value status-ok';
 
-/* ===== RENDER ===== */
-categories.forEach(cat=>{
-  menu.innerHTML+=`<div class="section ${cat.wine?'wine':''}">
-    <div class="section-title">${cat.title}</div>`;
-  cat.items.forEach(it=>{
-    const i=all.length;
-    all.push(it);
-    menu.innerHTML+=`
-      <div class="item">
-        <div class="item-top">
-          <div class="code">${it.code}</div>
-          <div>
-            <div class="name">${it.name}</div>
-            <div class="price">฿${it.glass} / glass · ฿${it.bottle} / bottle</div>
-          </div>
-        </div>
-        <div class="qty">
-          <div class="qty-block">
-            <div class="qty-label">Glass</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'g',-1)">−</button>
-              <div class="qty-val" id="g${i}">0</div>
-              <button class="btn" onclick="chg(${i},'g',1)">+</button>
-            </div>
-          </div>
-          <div class="qty-block">
-            <div class="qty-label">Bottle</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'b',-1)">−</button>
-              <div class="qty-val" id="b${i}">0</div>
-              <button class="btn" onclick="chg(${i},'b',1)">+</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
+    const hasFallback = (finalData.logs || []).some(row => row.status === 'fallback');
+    modeEl.textContent = hasFallback ? 'Fallback mixed' : 'AI';
+  } else {
+    statusEl.textContent = 'Idle';
+    statusEl.className = 'value status-warn';
+    modeEl.textContent = '-';
+  }
+}
+
+function renderPreview(rows) {
+  const body = document.querySelector('#previewTable tbody');
+  body.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.sku || r.SKU || ''}</td>
+      <td>${r.product_name_standard || r.product_name || r.name || ''}</td>
+      <td>${r.category || ''}</td>
+      <td>${r.style || ''}</td>
+      <td>${r.classification || ''}</td>
+      <td>${r.country || ''}</td>
+      <td>${r.region || ''}</td>
+      <td>${r.confidence_score ?? ''}</td>
+      <td>${r.remark || ''}</td>`;
+    body.appendChild(tr);
   });
-  menu.innerHTML+=`</div>`;
-});
-
-/* ===== LOGIC ===== */
-function chg(i,t,d){
-  const el=document.getElementById(t+i);
-  el.innerText=Math.max(0,Number(el.innerText)+d);
-  liveUpdate();
 }
 
-function liveUpdate(){
-  let items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    items+=g+b;
-    sub+=g*m.glass+b*m.bottle;
+function renderLogs(rows) {
+  const body = document.querySelector('#logTable tbody');
+  body.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.batch_id}</td>
+      <td>${r.sku}</td>
+      <td>${r.status}</td>
+      <td>${r.confidence_score}</td>
+      <td>${r.token_usage}</td>
+      <td>${r.error_message || ''}</td>
+      <td>${r.timestamp}</td>`;
+    body.appendChild(tr);
   });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  document.getElementById("items").innerText=items;
-  document.getElementById("subtotal").innerText=sub;
-  document.getElementById("discount").innerText=disc;
-  document.getElementById("final").innerText=sub-disc;
 }
 
-function updateSummary(){
-  const staff=document.getElementById("staff").value;
-  if(!staff){alert("Select staff");return;}
-  let list=[],items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    if(g||b){
-      list.push(`${m.code} G:${g} B:${b}`);
-      items+=g+b;
-      sub+=g*m.glass+b*m.bottle;
+runBtn.addEventListener('click', async () => {
+  const file = document.getElementById('file').files[0];
+  const batchSize = document.getElementById('batchSize').value || 20;
+  const useWeb = document.getElementById('useWeb').checked;
+
+  if (!file) {
+    alert('Please upload a CSV file.');
+    return;
+  }
+
+  setRunState(true);
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('batch_size', batchSize);
+  formData.append('use_web_context', useWeb ? '1' : '0');
+
+  try {
+    const response = await fetch('/api/process', { method: 'POST', body: formData });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Processing failed');
     }
-  });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  const total=sub-disc;
 
-  const payload={
-    timestamp:new Date().toLocaleString(),
-    order_id:"EVT-"+Date.now(),
-    staff,
-    total_items:items,
-    subtotal:sub,
-    discount:disc,
-    final_total:total,
-    member:document.getElementById("member").checked?"YES":"NO",
-    order_detail:list.join(", ")
-  };
+    setProgress(data);
+    renderPreview(data.preview || []);
+    renderLogs(data.logs || []);
 
-  const box=document.getElementById("orderSummary");
-  box.style.display="block";
-  box.innerHTML=`
-    <strong>${staff}</strong><br><br>
-    ${list.join("<br>")}<br><br>
-    <strong>Total ฿${total}</strong>
-    <button class="submit" onclick='submitOrder(${JSON.stringify(payload)})'>SUBMIT ORDER</button>`;
-}
+    document.getElementById('outLink').href = data.output_file || '#';
+    document.getElementById('logLink').href = data.log_file || '#';
 
-function submitOrder(p){
-  fetch(SHEET_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)})
-  .then(()=>location.reload())
-  .catch(()=>{
-    const q=JSON.parse(localStorage.getItem(OFFLINE_KEY)||"[]");
-    q.push(p);
-    localStorage.setItem(OFFLINE_KEY,JSON.stringify(q));
-    document.getElementById("offline").style.display="block";
-  });
-}
+    setRunState(false, data);
+  } catch (error) {
+    alert(error.message || 'Unexpected error occurred');
+    setRunState(false, null);
+  }
+});
 </script>
 </body>
 </html>
-
