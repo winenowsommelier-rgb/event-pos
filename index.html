@@ -1,494 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Wine-Now Event POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-/* ===== DESIGN SYSTEM ===== */
-:root{
-  --bg:#f7f7f8;
-  --card:#ffffff;
-  --ink:#111111;
-  --muted:#8a8a8a;
-  --border:#e6e6e9;
-  --accent:#7a1f2b;
-  --success:#1f7a3f;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
-  color:var(--ink);
-}
-
-/* ===== LAYOUT ===== */
-.app{
-  max-width:900px;
-  margin:auto;
-  padding:14px;
-}
-
-.header{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:14px;
-}
-
-.title{
-  font-size:20px;
-  font-weight:700;
-}
-
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-select,label{
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
-}
-
-/* ===== SECTIONS ===== */
-.section{
-  margin-top:22px;
-}
-
-.section-title{
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:10px;
-  padding-bottom:6px;
-  border-bottom:2px solid var(--border);
-}
-
-.section.wine .section-title{
-  color:var(--accent);
-  border-color:var(--accent);
-}
-
-/* ===== ITEM CARD ===== */
-.item{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-}
-
-.item-top{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-
-.code{
-  background:var(--accent);
-  color:#fff;
-  font-weight:800;
-  font-size:12px;
-  padding:6px 8px;
-  border-radius:8px;
-  min-width:46px;
-  text-align:center;
-}
-
-.name{
-  font-size:14px;
-  font-weight:600;
-  line-height:1.3;
-}
-
-.price{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-/* ===== QTY CONTROLS ===== */
-.qty{
-  display:flex;
-  gap:14px;
-  margin-top:10px;
-}
-
-.qty-block{
-  flex:1;
-  background:#fafafa;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px;
-  text-align:center;
-}
-
-.qty-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.qty-row{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-}
-
-.btn{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:18px;
-  font-weight:700;
-}
-
-.qty-val{
-  width:36px;
-  text-align:center;
-  font-weight:700;
-}
-
-/* ===== STICKY SUMMARY ===== */
-.summary-bar{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  border-top:2px solid var(--border);
-  margin-top:20px;
-  padding:12px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-}
-
-.sum{
-  text-align:center;
-  font-size:12px;
-  color:var(--muted);
-}
-
-.sum strong{
-  display:block;
-  font-size:15px;
-  color:var(--ink);
-}
-
-/* ===== ACTIONS ===== */
-.action{
-  margin-top:14px;
-}
-
-.update{
-  background:#111;
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-}
-
-.submit{
-  background:var(--success);
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-  margin-top:10px;
-}
-
-.order-summary{
-  display:none;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-top:14px;
-}
-
-.offline{
-  display:none;
-  background:#f59e0b;
-  color:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  margin-top:10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wine-Now / LIQ9 PIM Console</title>
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --panel:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --accent:#7a1f2b;
+      --accent-soft:#fbeaec;
+      --ok:#0f766e;
+      --warn:#d97706;
+      --danger:#b91c1c;
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+    .shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .sidebar{background:#111827;color:#f3f4f6;padding:18px;border-right:1px solid #1f2937}
+    .logo{font-weight:800;font-size:18px;line-height:1.3;margin-bottom:6px}
+    .sub{font-size:12px;color:#9ca3af;margin-bottom:16px}
+    .table-list{display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow:auto;padding-right:3px}
+    .table-btn{width:100%;text-align:left;background:#1f2937;color:#f9fafb;border:1px solid #374151;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px}
+    .table-btn.active{background:var(--accent);border-color:var(--accent)}
+    .side-actions{margin-top:16px;display:grid;gap:8px}
+    .side-actions button{border:1px solid #374151;background:#0f172a;color:#f9fafb;border-radius:10px;padding:10px;cursor:pointer}
+    .main{padding:18px;display:grid;gap:14px}
+    .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+    .top{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    h1{margin:0;font-size:20px}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px}
+    .kpi{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px}
+    .kpi .v{font-size:18px;font-weight:800}
+    .kpi .l{font-size:12px;color:var(--muted)}
+    .toolbar{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto auto auto;gap:8px;align-items:center}
+    input,select,button{font:inherit}
+    .input,.select{width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 10px}
+    .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer}
+    .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+    .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+    .btn.warn{background:var(--warn);border-color:var(--warn);color:#fff}
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:10px}
+    table{width:100%;border-collapse:collapse;min-width:1100px}
+    th,td{border-bottom:1px solid var(--border);padding:8px;vertical-align:top}
+    th{position:sticky;top:0;background:#f9fafb;text-align:left;font-size:12px}
+    td input{width:100%;border:1px solid #f0f2f5;border-radius:6px;padding:6px;font-size:12px}
+    .actions-cell{display:flex;gap:4px}
+    .mini{font-size:11px;padding:5px 6px;border-radius:7px;border:1px solid var(--border);background:#fff;cursor:pointer}
+    .mini.danger{color:var(--danger);border-color:#fecaca;background:#fff5f5}
+    .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+    .helper{font-size:12px;color:var(--muted);line-height:1.5}
+    .hidden{display:none}
+    @media (max-width:1100px){
+      .shell{grid-template-columns:1fr}
+      .sidebar{border-right:none;border-bottom:1px solid #1f2937}
+      .toolbar{grid-template-columns:1fr 1fr;}
+      .kpis{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
 </head>
-
 <body>
-<div class="app">
-
-  <div class="header">
-    <div class="title">🍷 Wine-Now / LIQ9 Event POS</div>
-    <div class="controls">
-      <select id="staff">
-        <option value="">Select Staff</option>
-        <option>staff1</option>
-        <option>staff2</option>
-        <option>staff3</option>
-        <option>staff4</option>
-      </select>
-      <label>
-        <input type="checkbox" id="member"> Member −25%
-      </label>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="logo">🍷 Product PIM Console</div>
+    <div class="sub">Wine-Now + LIQ9 taxonomy manager</div>
+    <div id="tableList" class="table-list"></div>
+    <div class="side-actions">
+      <button id="saveAllBtn">💾 Save all changes</button>
+      <button id="resetBtn">♻ Reset to seed</button>
+      <button id="exportAllBtn">📦 Export all CSV</button>
     </div>
-  </div>
+  </aside>
 
-  <div id="menu"></div>
+  <main class="main">
+    <section class="card top">
+      <div>
+        <h1 id="title">Dataset</h1>
+        <div class="helper">Manage taxonomy, PIM attributes, and AI-ready recommendation fields. Edit inline, import CSV, and export clean UTF-8 CSV files.</div>
+      </div>
+      <span class="pill" id="dirtyTag">saved</span>
+    </section>
 
-  <div class="summary-bar">
-    <div class="sum">Items<strong id="items">0</strong></div>
-    <div class="sum">Subtotal<strong>฿<span id="subtotal">0</span></strong></div>
-    <div class="sum">Discount<strong>฿<span id="discount">0</span></strong></div>
-    <div class="sum">Total<strong>฿<span id="final">0</span></strong></div>
-  </div>
+    <section class="kpis">
+      <div class="kpi"><div class="v" id="kpiTables">0</div><div class="l">tables</div></div>
+      <div class="kpi"><div class="v" id="kpiRows">0</div><div class="l">rows (active table)</div></div>
+      <div class="kpi"><div class="v" id="kpiCols">0</div><div class="l">columns</div></div>
+      <div class="kpi"><div class="v" id="kpiUpdated">0</div><div class="l">pending edits</div></div>
+    </section>
 
-  <div class="action">
-    <button class="update" onclick="updateSummary()">UPDATE</button>
-  </div>
+    <section class="card">
+      <div class="toolbar">
+        <input id="searchInput" class="input" placeholder="Search current table..." />
+        <select id="pageSize" class="select">
+          <option value="10">10 rows/page</option>
+          <option value="25" selected>25 rows/page</option>
+          <option value="50">50 rows/page</option>
+          <option value="100">100 rows/page</option>
+        </select>
+        <button class="btn" id="addRowBtn">＋ Add row</button>
+        <button class="btn" id="exportTableBtn">Export current CSV</button>
+        <label class="btn" for="importFile">Import CSV</label>
+        <input id="importFile" class="hidden" type="file" accept=".csv,text/csv" />
+        <button class="btn ok" id="applyImportBtn">Apply import</button>
+      </div>
+    </section>
 
-  <div class="order-summary" id="orderSummary"></div>
-  <div class="offline" id="offline">Offline – order queued</div>
+    <section class="card">
+      <div class="table-wrap">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="foot">
+        <div id="pageInfo">Page 1</div>
+        <div>
+          <button class="btn" id="prevBtn">← Prev</button>
+          <button class="btn" id="nextBtn">Next →</button>
+        </div>
+      </div>
+    </section>
 
+    <section class="card helper">
+      <strong>Suggested frontend functions included:</strong>
+      inline editing • row add/duplicate/delete • search • pagination • CSV import/replace • per-table export • export-all zip-like multi-download • local persistence • reset to seed for safe experiments.
+    </section>
+  </main>
 </div>
 
 <script>
-/* ===== CONFIG ===== */
-const SHEET_API="https://api.sheetbest.com/sheets/1b49c5c2-ff03-4fba-acb9-91e9c280073d";
-const OFFLINE_KEY="event_order_queue";
+const STORAGE_KEY = 'event_pos_pim_dataset_v2';
 
-/* ===== MENU DATA (UNCHANGED) ===== */
-const categories = [
+const schema = {
+  product_master:['product_id','sku','product_name','brand','producer','product_type','category','sub_category','country','region','subregion','appellation','grape_variety','grape_class','wine_style','spirit_style','flavor_profile','food_pairing','alcohol','vintage','bottle_size','price_segment','critic_score','critic_source','taste_vector','pairing_vector','recommendation_score'],
+  wine_type:['wine_type_id','wine_type','description'],
+  grape_variety:['grape_id','grape_name','grape_class','origin_country','primary_regions','typical_style','body','acidity','tannin'],
+  wine_region:['region_id','country','region','subregion','appellation','classification_level'],
+  wine_style:['style_id','style_name','body','acidity','tannin','sweetness','typical_grapes'],
+  wine_flavor_profile:['flavor_id','flavor_tag','flavor_category'],
+  wine_food_pairing:['pairing_id','food_name','food_category','recommended_wine_style','recommended_grape','pairing_reason'],
+  spirit_type:['spirit_type_id','spirit_type','base_ingredient','origin'],
+  whisky_style:['style_id','whisky_style','country','region','flavor_profile','typical_abv'],
+  spirit_flavor_profile:['flavor_id','flavor_tag','category','typical_spirits']
+};
 
-/* ================= WINE-NOW ================= */
-
-{
-  title: "🍷 Red Wine",
-  wine: true,
-  items: [
-    { code:"RW1", name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge", glass:450, bottle:2100 },
-    { code:"RW2", name:"Poliziano In Violas Cortona Merlot D.O.C", glass:350, bottle:1900 },
-    { code:"RW3", name:"J. Lohr Seven Oaks Cabernet Sauvignon", glass:350, bottle:1800 },
-    { code:"RW4", name:"Chateau Les Clavelines Saint Emilion Grand Cru", glass:350, bottle:1600 },
-    { code:"RW5", name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW6", name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW7", name:"Chateau La Gasquerie AOP Bordeaux Rouge", glass:250, bottle:1300 },
-    { code:"RW8", name:"Chateau Pericou AOP Bordeaux Rouge", glass:250, bottle:1300 }
-  ]
-},
-
-{
-  title: "🍾 White Wine",
-  wine: true,
-  items: [
-    { code:"WW1", name:"Greywacke Wild Sauvignon", glass:350, bottle:1800 },
-    { code:"WW2", name:"Karthäuserhof Bruno Riesling Dry", glass:350, bottle:1700 },
-    { code:"WW3", name:"Robert Mondavi Private Selection Vintage Chardonnay", glass:250, bottle:1500 }
-  ]
-},
-
-{
-  title: "🥂 Sparkling & Rosé",
-  wine: true,
-  items: [
-    { code:"SP1", name:"Champagne Alain Navarre Cuvée Tradition Brut", glass:350, bottle:1800 },
-    { code:"SP2", name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato", glass:250, bottle:1500 },
-    { code:"SP3", name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut", glass:250, bottle:1500 },
-    { code:"RS1", name:"Domaines Ott By Ott Rosé", glass:350, bottle:1600 }
-  ]
-},
-
-/* ================= LIQ9 ================= */
-
-{
-  title: "🥃 Whisky",
-  items: [
-    { code:"LW1", name:"Kyoto Whisky Kuro-Obi", glass:300, bottle:2200 },
-    { code:"LW2", name:"Monkey Shoulder Blended Malt", glass:250, bottle:2100 }
-  ]
-},
-
-{
-  title: "🍸 Gin",
-  items: [
-    { code:"LG1", name:"Sipsmith London Dry", glass:400, bottle:2800 },
-    { code:"LG2", name:"Monkey 47 Dry Gin", glass:400, bottle:2800 },
-    { code:"LG3", name:"Inchon Esprit Des Champs Gin", glass:200, bottle:1400 }
-  ]
-},
-
-{
-  title: "🍹 Liqueur / Aperitif",
-  items: [
-    { code:"LL1", name:"Aperol", glass:300, bottle:1500 },
-    { code:"LL2", name:"Amaro Montenegro", glass:250, bottle:1900 }
-  ]
-},
-
-{
-  title: "🔥 Feature Spirits",
-  items: [
-    { code:"LB1", name:"H by Hine VSOP", glass:350, bottle:3000 },
-    { code:"LT1", name:"Dos Companeros Silver Tequila", glass:250, bottle:1700 },
-    { code:"LV1", name:"Buss N°One Vodka", glass:250, bottle:2400 },
-    { code:"LV2", name:"Suntory Haku Vodka", glass:250, bottle:2000 },
-    { code:"LR1", name:"Chalong Bay Rum", glass:200, bottle:1400 }
-  ]
-},
-
-/* ================= NON-ALCOHOL ================= */
-
-{
-  title: "🥤 Non-Alcohol & NA",
-  items: [
-    { code:"NS1", name:"Mont Étoile Natural Mineral Water (500 ml) (PET)", glass:40, bottle:40 },
-    { code:"NS2", name:"SCHWEPPES Soda Water", glass:40, bottle:40 },
-    { code:"NS3", name:"SCHWEPPES Tonic Water", glass:40, bottle:40 },
-    { code:"NS4", name:"Coke", glass:40, bottle:40 },
-    { code:"NS5", name:"Spritz", glass:40, bottle:40 },
-
-    { code:"NW1", name:"Enjoy It NA Cabernet", glass:300, bottle:1485 },
-    { code:"NW2", name:"Enjoy It NA Sauvignon Blanc", glass:300, bottle:1485 },
-    { code:"NW3", name:"Enjoy It NA Sparkling", glass:300, bottle:1485 },
-
-    { code:"NL1", name:"Sober Spirits Gin", glass:350, bottle:2999 }
-  ]
+function seedRows(cols, n=4, prefix='row'){
+  return Array.from({length:n},(_,i)=>Object.fromEntries(cols.map((c,ci)=>[c, ci===0?String(i+1):`${prefix}_${i+1}_${c}`])));
 }
 
-];
+const seedData = {
+  product_master:[
+    {product_id:'1',sku:'sku_000001',product_name:'cabernet_reserve_2019',brand:'wine_now',producer:'chateau_rivage',product_type:'wine',category:'beverage',sub_category:'fine_wine',country:'france',region:'bordeaux',subregion:'medoc',appellation:'margaux',grape_variety:'cabernet_sauvignon',grape_class:'red',wine_style:'full_red',spirit_style:'',flavor_profile:'blackberry',food_pairing:'beef_wellington',alcohol:'13.5',vintage:'2019',bottle_size:'750ml',price_segment:'premium',critic_score:'94',critic_source:'decanter',taste_vector:'[0.82,0.64,0.71]',pairing_vector:'[0.76,0.61,0.68]',recommendation_score:'0.93'},
+    {product_id:'2',sku:'sku_000002',product_name:'juniper_peak_london_dry',brand:'liq9',producer:'distillery_north',product_type:'gin',category:'beverage',sub_category:'spirits',country:'england',region:'london',subregion:'city',appellation:'london_dry',grape_variety:'',grape_class:'',wine_style:'',spirit_style:'',flavor_profile:'juniper',food_pairing:'',alcohol:'42.0',vintage:'',bottle_size:'700ml',price_segment:'premium',critic_score:'91',critic_source:'distiller',taste_vector:'[0.51,0.72,0.47]',pairing_vector:'[0.49,0.63,0.45]',recommendation_score:'0.88'}
+  ],
+  wine_type:[
+    {wine_type_id:'1',wine_type:'red_wine',description:'still red wines from black grapes'},
+    {wine_type_id:'2',wine_type:'white_wine',description:'still white wines from white grapes or gentle pressing'},
+    {wine_type_id:'3',wine_type:'sparkling_wine',description:'wines with natural carbonation'}
+  ],
+  grape_variety:[
+    {grape_id:'1',grape_name:'cabernet_sauvignon',grape_class:'red',origin_country:'france',primary_regions:'bordeaux',typical_style:'structured_black_fruit',body:'full',acidity:'medium',tannin:'high'},
+    {grape_id:'2',grape_name:'chardonnay',grape_class:'white',origin_country:'france',primary_regions:'burgundy',typical_style:'apple_citrus_oak',body:'medium_full',acidity:'medium_high',tannin:'low'},
+    {grape_id:'3',grape_name:'riesling',grape_class:'white',origin_country:'germany',primary_regions:'mosel',typical_style:'lime_floral_mineral',body:'light',acidity:'high',tannin:'low'}
+  ],
+  wine_region:[
+    {region_id:'1',country:'france',region:'bordeaux',subregion:'medoc',appellation:'margaux',classification_level:'appellation'},
+    {region_id:'2',country:'italy',region:'tuscany',subregion:'chianti_classico',appellation:'greve',classification_level:'appellation'},
+    {region_id:'3',country:'usa',region:'napa_valley',subregion:'oakville',appellation:'oakville_ava',classification_level:'ava'}
+  ],
+  wine_style:[
+    {style_id:'1',style_name:'full_red',body:'full',acidity:'medium',tannin:'high',sweetness:'dry',typical_grapes:'cabernet_sauvignon|syrah'},
+    {style_id:'2',style_name:'crisp_white',body:'light',acidity:'high',tannin:'low',sweetness:'dry',typical_grapes:'sauvignon_blanc|albarino'},
+    {style_id:'3',style_name:'sparkling_brut',body:'light',acidity:'high',tannin:'low',sweetness:'dry',typical_grapes:'chardonnay|pinot_noir'}
+  ],
+  wine_flavor_profile:[
+    {flavor_id:'1',flavor_tag:'blackberry',flavor_category:'dark_fruit'},
+    {flavor_id:'2',flavor_tag:'violet',flavor_category:'floral'},
+    {flavor_id:'3',flavor_tag:'cedar',flavor_category:'oak'}
+  ],
+  wine_food_pairing:[
+    {pairing_id:'1',food_name:'beef_wellington',food_category:'british',recommended_wine_style:'full_red',recommended_grape:'cabernet_sauvignon',pairing_reason:'protein_and_tannin_pair_well'},
+    {pairing_id:'2',food_name:'sushi',food_category:'japanese',recommended_wine_style:'crisp_white',recommended_grape:'riesling',pairing_reason:'acidity_balances_umami'},
+    {pairing_id:'3',food_name:'pad_thai',food_category:'thai',recommended_wine_style:'aromatic_white',recommended_grape:'gewurztraminer',pairing_reason:'off_dry_style_softens_spice'}
+  ],
+  spirit_type:[
+    {spirit_type_id:'1',spirit_type:'whisky',base_ingredient:'grain',origin:'scotland'},
+    {spirit_type_id:'2',spirit_type:'gin',base_ingredient:'neutral_spirit_with_botanicals',origin:'england'},
+    {spirit_type_id:'3',spirit_type:'rum',base_ingredient:'sugarcane',origin:'caribbean'}
+  ],
+  whisky_style:[
+    {style_id:'1',whisky_style:'scotch_single_malt',country:'scotland',region:'speyside',flavor_profile:'orchard_fruit_honey_malt',typical_abv:'40_46'},
+    {style_id:'2',whisky_style:'bourbon',country:'usa',region:'kentucky',flavor_profile:'vanilla_caramel_oak',typical_abv:'40_50'},
+    {style_id:'3',whisky_style:'japanese_whisky',country:'japan',region:'yamazaki',flavor_profile:'elegant_fruit_incense_oak',typical_abv:'43_48'}
+  ],
+  spirit_flavor_profile:[
+    {flavor_id:'1',flavor_tag:'juniper',category:'botanical',typical_spirits:'gin'},
+    {flavor_id:'2',flavor_tag:'vanilla',category:'sweet_oak',typical_spirits:'whisky|rum'},
+    {flavor_id:'3',flavor_tag:'smoky',category:'oak_fire',typical_spirits:'whisky|mezcal'}
+  ]
+};
 
+let db = loadDb();
+let activeTable = Object.keys(schema)[0];
+let search = '';
+let page = 1;
+let pageSize = 25;
+let pendingEdits = 0;
+let importedRows = null;
 
-let all=[];
-const menu=document.getElementById("menu");
+const tableList = document.getElementById('tableList');
+const titleEl = document.getElementById('title');
+const dirtyTag = document.getElementById('dirtyTag');
+const thead = document.getElementById('thead');
+const tbody = document.getElementById('tbody');
 
-/* ===== RENDER ===== */
-categories.forEach(cat=>{
-  menu.innerHTML+=`<div class="section ${cat.wine?'wine':''}">
-    <div class="section-title">${cat.title}</div>`;
-  cat.items.forEach(it=>{
-    const i=all.length;
-    all.push(it);
-    menu.innerHTML+=`
-      <div class="item">
-        <div class="item-top">
-          <div class="code">${it.code}</div>
-          <div>
-            <div class="name">${it.name}</div>
-            <div class="price">฿${it.glass} / glass · ฿${it.bottle} / bottle</div>
-          </div>
-        </div>
-        <div class="qty">
-          <div class="qty-block">
-            <div class="qty-label">Glass</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'g',-1)">−</button>
-              <div class="qty-val" id="g${i}">0</div>
-              <button class="btn" onclick="chg(${i},'g',1)">+</button>
-            </div>
-          </div>
-          <div class="qty-block">
-            <div class="qty-label">Bottle</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'b',-1)">−</button>
-              <div class="qty-val" id="b${i}">0</div>
-              <button class="btn" onclick="chg(${i},'b',1)">+</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
+function loadDb(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return structuredClone(seedData);
+  try {
+    const parsed = JSON.parse(raw);
+    for(const t of Object.keys(schema)) if(!Array.isArray(parsed[t])) parsed[t] = [];
+    return parsed;
+  } catch {
+    return structuredClone(seedData);
+  }
+}
+
+function saveDb(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+  pendingEdits = 0;
+  setDirty(false);
+  refresh();
+}
+
+function setDirty(isDirty){
+  dirtyTag.textContent = isDirty ? 'unsaved changes' : 'saved';
+  dirtyTag.style.background = isDirty ? '#fff7ed' : 'var(--accent-soft)';
+  dirtyTag.style.color = isDirty ? '#b45309' : 'var(--accent)';
+}
+
+function toCsv(rows, cols){
+  const esc = v => {
+    const s = String(v ?? '');
+    if(/[",\n]/.test(s)) return '"' + s.replaceAll('"','""') + '"';
+    return s;
+  };
+  const lines = [cols.join(',')];
+  rows.forEach(r => lines.push(cols.map(c=>esc(r[c])).join(',')));
+  return lines.join('\n');
+}
+
+function parseCsv(text){
+  const rows=[]; let row=[]; let field=''; let inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i], nx=text[i+1];
+    if(ch==='"'){
+      if(inQ && nx==='"'){ field+='"'; i++; }
+      else inQ=!inQ;
+    } else if(ch===',' && !inQ){ row.push(field); field=''; }
+    else if((ch==='\n' || ch==='\r') && !inQ){
+      if(ch==='\r' && nx==='\n') i++;
+      row.push(field); field='';
+      if(row.some(v=>v!=='')) rows.push(row);
+      row=[];
+    } else field+=ch;
+  }
+  if(field!=='' || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+
+function download(name, content){
+  const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function switchTable(t){ activeTable=t; page=1; search=''; document.getElementById('searchInput').value=''; importedRows=null; refresh(); }
+
+function refreshList(){
+  tableList.innerHTML='';
+  Object.keys(schema).forEach(t=>{
+    const b=document.createElement('button');
+    b.className='table-btn'+(t===activeTable?' active':'');
+    b.textContent=`${t} (${db[t].length})`;
+    b.onclick=()=>switchTable(t);
+    tableList.appendChild(b);
   });
-  menu.innerHTML+=`</div>`;
+}
+
+function filteredRows(){
+  const rows=db[activeTable]||[];
+  if(!search.trim()) return rows;
+  const q=search.trim().toLowerCase();
+  return rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+}
+
+function refreshTable(){
+  const cols=schema[activeTable];
+  const rows=filteredRows();
+  const start=(page-1)*pageSize;
+  const chunk=rows.slice(start,start+pageSize);
+
+  thead.innerHTML='<tr>'+cols.map(c=>`<th>${c}</th>`).join('')+'<th>actions</th></tr>';
+  tbody.innerHTML='';
+
+  chunk.forEach((r, idx)=>{
+    const tr=document.createElement('tr');
+    cols.forEach(c=>{
+      const td=document.createElement('td');
+      const input=document.createElement('input');
+      input.value=r[c]??'';
+      input.onchange=()=>{
+        r[c]=input.value;
+        pendingEdits++;
+        setDirty(true);
+        refreshKpis();
+      };
+      td.appendChild(input);
+      tr.appendChild(td);
+    });
+    const tdA=document.createElement('td'); tdA.className='actions-cell';
+    const realIndex=start+idx;
+    tdA.innerHTML=`<button class="mini">Duplicate</button><button class="mini danger">Delete</button>`;
+    tdA.children[0].onclick=()=>{db[activeTable].splice(realIndex+1,0,{...db[activeTable][realIndex]});pendingEdits++;setDirty(true);refresh();};
+    tdA.children[1].onclick=()=>{db[activeTable].splice(realIndex,1);pendingEdits++;setDirty(true);refresh();};
+    tr.appendChild(tdA);
+    tbody.appendChild(tr);
+  });
+
+  const totalPages=Math.max(1,Math.ceil(rows.length/pageSize));
+  if(page>totalPages) page=totalPages;
+  document.getElementById('pageInfo').textContent=`Page ${page}/${totalPages} • Showing ${chunk.length} of ${rows.length}`;
+}
+
+function refreshKpis(){
+  document.getElementById('kpiTables').textContent = Object.keys(schema).length;
+  document.getElementById('kpiRows').textContent = db[activeTable].length;
+  document.getElementById('kpiCols').textContent = schema[activeTable].length;
+  document.getElementById('kpiUpdated').textContent = pendingEdits;
+  titleEl.textContent = `${activeTable} dataset`;
+}
+
+function refresh(){
+  refreshList();
+  refreshTable();
+  refreshKpis();
+}
+
+// events
+
+document.getElementById('searchInput').addEventListener('input', e=>{search=e.target.value;page=1;refreshTable();});
+document.getElementById('pageSize').addEventListener('change', e=>{pageSize=Number(e.target.value);page=1;refreshTable();});
+document.getElementById('prevBtn').onclick=()=>{page=Math.max(1,page-1);refreshTable();};
+document.getElementById('nextBtn').onclick=()=>{page=page+1;refreshTable();};
+document.getElementById('addRowBtn').onclick=()=>{
+  const cols=schema[activeTable];
+  const row=Object.fromEntries(cols.map((c,i)=>[c, i===0?String((db[activeTable].length||0)+1):'']));
+  db[activeTable].unshift(row);
+  pendingEdits++;setDirty(true);page=1;refresh();
+};
+
+document.getElementById('saveAllBtn').onclick=saveDb;
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('Reset all local edits and reload seeded data?')){ db=structuredClone(seedData); pendingEdits=0; setDirty(false); saveDb(); refresh(); }
+};
+
+document.getElementById('exportTableBtn').onclick=()=>{
+  const cols=schema[activeTable];
+  download(`${activeTable}.csv`, toCsv(db[activeTable], cols));
+};
+
+document.getElementById('exportAllBtn').onclick=()=>{
+  Object.keys(schema).forEach(t=>download(`${t}.csv`, toCsv(db[t], schema[t])));
+};
+
+document.getElementById('importFile').addEventListener('change', async e=>{
+  const f=e.target.files[0];
+  if(!f) return;
+  const text=await f.text();
+  const parsed=parseCsv(text);
+  if(parsed.length<2){ alert('CSV appears empty.'); return; }
+  const headers=parsed[0].map(h=>h.trim());
+  const cols=schema[activeTable];
+  const missing=cols.filter(c=>!headers.includes(c));
+  if(missing.length){ alert('Missing required columns: '+missing.join(', ')); return; }
+  importedRows = parsed.slice(1).map(r=>Object.fromEntries(cols.map(c=>[c,r[headers.indexOf(c)]??''])));
+  alert(`Loaded import preview: ${importedRows.length} rows for ${activeTable}. Click Apply import.`);
 });
 
-/* ===== LOGIC ===== */
-function chg(i,t,d){
-  const el=document.getElementById(t+i);
-  el.innerText=Math.max(0,Number(el.innerText)+d);
-  liveUpdate();
-}
+document.getElementById('applyImportBtn').onclick=()=>{
+  if(!importedRows){ alert('No CSV loaded yet.'); return; }
+  if(confirm(`Replace ${activeTable} with ${importedRows.length} imported rows?`)){
+    db[activeTable]=importedRows;
+    importedRows=null;
+    pendingEdits++;
+    setDirty(true);
+    page=1;
+    refresh();
+  }
+};
 
-function liveUpdate(){
-  let items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    items+=g+b;
-    sub+=g*m.glass+b*m.bottle;
-  });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  document.getElementById("items").innerText=items;
-  document.getElementById("subtotal").innerText=sub;
-  document.getElementById("discount").innerText=disc;
-  document.getElementById("final").innerText=sub-disc;
-}
-
-function updateSummary(){
-  const staff=document.getElementById("staff").value;
-  if(!staff){alert("Select staff");return;}
-  let list=[],items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    if(g||b){
-      list.push(`${m.code} G:${g} B:${b}`);
-      items+=g+b;
-      sub+=g*m.glass+b*m.bottle;
-    }
-  });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  const total=sub-disc;
-
-  const payload={
-    timestamp:new Date().toLocaleString(),
-    order_id:"EVT-"+Date.now(),
-    staff,
-    total_items:items,
-    subtotal:sub,
-    discount:disc,
-    final_total:total,
-    member:document.getElementById("member").checked?"YES":"NO",
-    order_detail:list.join(", ")
-  };
-
-  const box=document.getElementById("orderSummary");
-  box.style.display="block";
-  box.innerHTML=`
-    <strong>${staff}</strong><br><br>
-    ${list.join("<br>")}<br><br>
-    <strong>Total ฿${total}</strong>
-    <button class="submit" onclick='submitOrder(${JSON.stringify(payload)})'>SUBMIT ORDER</button>`;
-}
-
-function submitOrder(p){
-  fetch(SHEET_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)})
-  .then(()=>location.reload())
-  .catch(()=>{
-    const q=JSON.parse(localStorage.getItem(OFFLINE_KEY)||"[]");
-    q.push(p);
-    localStorage.setItem(OFFLINE_KEY,JSON.stringify(q));
-    document.getElementById("offline").style.display="block";
-  });
-}
+// init fallback for empty tables
+for(const t of Object.keys(schema)) if(!db[t] || db[t].length===0) db[t]=seedRows(schema[t],3,t);
+refresh();
 </script>
 </body>
 </html>
-

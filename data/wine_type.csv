@@ -1,0 +1,13 @@
+wine_type_id,wine_type,description
+1,red_wine,still red wines from black grapes
+2,white_wine,still white wines from white grapes or gentle pressing
+3,rose_wine,pink wines from limited skin contact
+4,sparkling_wine,wines with natural carbonation
+5,champagne,traditional method sparkling from champagne
+6,dessert_wine,sweet wines typically served with dessert
+7,fortified_wine,wine strengthened with grape spirit
+8,orange_wine,skin-contact white wine with tannic texture
+9,natural_wine,minimal intervention wines
+10,pet_nat,ancestral method naturally sparkling wine
+11,ice_wine,sweet wine from frozen grapes
+12,aromatized_wine,wine infused with botanicals
