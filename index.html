@@ -1,494 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Wine-Now Event POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-/* ===== DESIGN SYSTEM ===== */
-:root{
-  --bg:#f7f7f8;
-  --card:#ffffff;
-  --ink:#111111;
-  --muted:#8a8a8a;
-  --border:#e6e6e9;
-  --accent:#7a1f2b;
-  --success:#1f7a3f;
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,sans-serif;
-  color:var(--ink);
-}
-
-/* ===== LAYOUT ===== */
-.app{
-  max-width:900px;
-  margin:auto;
-  padding:14px;
-}
-
-.header{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-bottom:14px;
-}
-
-.title{
-  font-size:20px;
-  font-weight:700;
-}
-
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-select,label{
-  padding:10px 12px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:14px;
-}
-
-/* ===== SECTIONS ===== */
-.section{
-  margin-top:22px;
-}
-
-.section-title{
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:10px;
-  padding-bottom:6px;
-  border-bottom:2px solid var(--border);
-}
-
-.section.wine .section-title{
-  color:var(--accent);
-  border-color:var(--accent);
-}
-
-/* ===== ITEM CARD ===== */
-.item{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-}
-
-.item-top{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-
-.code{
-  background:var(--accent);
-  color:#fff;
-  font-weight:800;
-  font-size:12px;
-  padding:6px 8px;
-  border-radius:8px;
-  min-width:46px;
-  text-align:center;
-}
-
-.name{
-  font-size:14px;
-  font-weight:600;
-  line-height:1.3;
-}
-
-.price{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:2px;
-}
-
-/* ===== QTY CONTROLS ===== */
-.qty{
-  display:flex;
-  gap:14px;
-  margin-top:10px;
-}
-
-.qty-block{
-  flex:1;
-  background:#fafafa;
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:8px;
-  text-align:center;
-}
-
-.qty-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
-}
-
-.qty-row{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:8px;
-}
-
-.btn{
-  width:34px;
-  height:34px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;
-  font-size:18px;
-  font-weight:700;
-}
-
-.qty-val{
-  width:36px;
-  text-align:center;
-  font-weight:700;
-}
-
-/* ===== STICKY SUMMARY ===== */
-.summary-bar{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  border-top:2px solid var(--border);
-  margin-top:20px;
-  padding:12px;
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-}
-
-.sum{
-  text-align:center;
-  font-size:12px;
-  color:var(--muted);
-}
-
-.sum strong{
-  display:block;
-  font-size:15px;
-  color:var(--ink);
-}
-
-/* ===== ACTIONS ===== */
-.action{
-  margin-top:14px;
-}
-
-.update{
-  background:#111;
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-}
-
-.submit{
-  background:var(--success);
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:14px;
-  width:100%;
-  font-size:16px;
-  font-weight:700;
-  margin-top:10px;
-}
-
-.order-summary{
-  display:none;
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-top:14px;
-}
-
-.offline{
-  display:none;
-  background:#f59e0b;
-  color:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  margin-top:10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wine-Now / LIQ9 Product Intelligence Engine</title>
+  <style>
+    body { font-family: Inter, Arial, sans-serif; background:#f4f6f8; margin:0; color:#1f2937; }
+    .container { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; margin-bottom:14px; }
+    h1,h2 { margin:0 0 10px; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
+    input, button { padding:10px 12px; border-radius:8px; border:1px solid #d1d5db; }
+    button { background:#6d1431; color:white; border:none; cursor:pointer; font-weight:600; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .muted { color:#6b7280; }
+    table { width:100%; border-collapse: collapse; font-size:13px; }
+    th, td { border:1px solid #e5e7eb; padding:8px; text-align:left; }
+    th { background:#f9fafb; }
+    .downloads a { margin-right:10px; }
+  </style>
 </head>
-
 <body>
-<div class="app">
+  <div class="container">
+    <div class="card">
+      <h1>Wine-Now / LIQ9</h1>
+      <h2>Product Intelligence Engine</h2>
+      <p class="muted">Upload a product CSV and generate structured product intelligence.</p>
+    </div>
 
-  <div class="header">
-    <div class="title">🍷 Wine-Now / LIQ9 Event POS</div>
-    <div class="controls">
-      <select id="staff">
-        <option value="">Select Staff</option>
-        <option>staff1</option>
-        <option>staff2</option>
-        <option>staff3</option>
-        <option>staff4</option>
-      </select>
-      <label>
-        <input type="checkbox" id="member"> Member −25%
-      </label>
+    <div class="card">
+      <h3>Section 1 — Upload Dataset</h3>
+      <div class="row">
+        <div>
+          <label>Upload Product CSV</label><br>
+          <input type="file" id="file" accept=".csv" />
+        </div>
+        <div>
+          <label>Batch Size</label><br>
+          <input type="number" id="batchSize" value="20" min="1" />
+        </div>
+        <button id="runBtn">Run AI Analysis</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Section 2 — Progress Monitor</h3>
+      <div id="progress">Progress: 0%</div>
+      <div id="counts" class="muted">Processed: 0 / 0 · Errors: 0 · ETA: -</div>
+    </div>
+
+    <div class="card">
+      <h3>Section 3 — Live Result Preview</h3>
+      <div style="overflow:auto; max-height:320px;">
+        <table id="previewTable">
+          <thead>
+            <tr>
+              <th>SKU</th><th>Product Name</th><th>Category</th><th>Style</th>
+              <th>Classification</th><th>Country</th><th>Region</th><th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Section 4 — Download Results</h3>
+      <div class="downloads">
+        <a id="outLink" href="#">Download Enriched CSV</a>
+        <a id="logLink" href="#">Download Processing Log</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Section 5 — Processing Logs</h3>
+      <div style="overflow:auto; max-height:220px;">
+        <table id="logTable">
+          <thead>
+            <tr>
+              <th>batch_id</th><th>sku</th><th>status</th><th>confidence_score</th>
+              <th>token_usage</th><th>error_message</th><th>timestamp</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <div id="menu"></div>
-
-  <div class="summary-bar">
-    <div class="sum">Items<strong id="items">0</strong></div>
-    <div class="sum">Subtotal<strong>฿<span id="subtotal">0</span></strong></div>
-    <div class="sum">Discount<strong>฿<span id="discount">0</span></strong></div>
-    <div class="sum">Total<strong>฿<span id="final">0</span></strong></div>
-  </div>
-
-  <div class="action">
-    <button class="update" onclick="updateSummary()">UPDATE</button>
-  </div>
-
-  <div class="order-summary" id="orderSummary"></div>
-  <div class="offline" id="offline">Offline – order queued</div>
-
-</div>
-
 <script>
-/* ===== CONFIG ===== */
-const SHEET_API="https://api.sheetbest.com/sheets/1b49c5c2-ff03-4fba-acb9-91e9c280073d";
-const OFFLINE_KEY="event_order_queue";
+const runBtn = document.getElementById('runBtn');
 
-/* ===== MENU DATA (UNCHANGED) ===== */
-const categories = [
-
-/* ================= WINE-NOW ================= */
-
-{
-  title: "🍷 Red Wine",
-  wine: true,
-  items: [
-    { code:"RW1", name:"Maison Jaffelin Bourgogne Hautes-Côtes de Beaune Rouge", glass:450, bottle:2100 },
-    { code:"RW2", name:"Poliziano In Violas Cortona Merlot D.O.C", glass:350, bottle:1900 },
-    { code:"RW3", name:"J. Lohr Seven Oaks Cabernet Sauvignon", glass:350, bottle:1800 },
-    { code:"RW4", name:"Chateau Les Clavelines Saint Emilion Grand Cru", glass:350, bottle:1600 },
-    { code:"RW5", name:"Reserve Tradition du Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW6", name:"Chateau de la Vieille Tour Bordeaux Supérieur AOP", glass:350, bottle:1600 },
-    { code:"RW7", name:"Chateau La Gasquerie AOP Bordeaux Rouge", glass:250, bottle:1300 },
-    { code:"RW8", name:"Chateau Pericou AOP Bordeaux Rouge", glass:250, bottle:1300 }
-  ]
-},
-
-{
-  title: "🍾 White Wine",
-  wine: true,
-  items: [
-    { code:"WW1", name:"Greywacke Wild Sauvignon", glass:350, bottle:1800 },
-    { code:"WW2", name:"Karthäuserhof Bruno Riesling Dry", glass:350, bottle:1700 },
-    { code:"WW3", name:"Robert Mondavi Private Selection Vintage Chardonnay", glass:250, bottle:1500 }
-  ]
-},
-
-{
-  title: "🥂 Sparkling & Rosé",
-  wine: true,
-  items: [
-    { code:"SP1", name:"Champagne Alain Navarre Cuvée Tradition Brut", glass:350, bottle:1800 },
-    { code:"SP2", name:"Pitars Prosecco Gold Spumante Extra Dry Millesimato", glass:250, bottle:1500 },
-    { code:"SP3", name:"Granmonte Sparkling Rosé Méthode Traditionnelle Brut", glass:250, bottle:1500 },
-    { code:"RS1", name:"Domaines Ott By Ott Rosé", glass:350, bottle:1600 }
-  ]
-},
-
-/* ================= LIQ9 ================= */
-
-{
-  title: "🥃 Whisky",
-  items: [
-    { code:"LW1", name:"Kyoto Whisky Kuro-Obi", glass:300, bottle:2200 },
-    { code:"LW2", name:"Monkey Shoulder Blended Malt", glass:250, bottle:2100 }
-  ]
-},
-
-{
-  title: "🍸 Gin",
-  items: [
-    { code:"LG1", name:"Sipsmith London Dry", glass:400, bottle:2800 },
-    { code:"LG2", name:"Monkey 47 Dry Gin", glass:400, bottle:2800 },
-    { code:"LG3", name:"Inchon Esprit Des Champs Gin", glass:200, bottle:1400 }
-  ]
-},
-
-{
-  title: "🍹 Liqueur / Aperitif",
-  items: [
-    { code:"LL1", name:"Aperol", glass:300, bottle:1500 },
-    { code:"LL2", name:"Amaro Montenegro", glass:250, bottle:1900 }
-  ]
-},
-
-{
-  title: "🔥 Feature Spirits",
-  items: [
-    { code:"LB1", name:"H by Hine VSOP", glass:350, bottle:3000 },
-    { code:"LT1", name:"Dos Companeros Silver Tequila", glass:250, bottle:1700 },
-    { code:"LV1", name:"Buss N°One Vodka", glass:250, bottle:2400 },
-    { code:"LV2", name:"Suntory Haku Vodka", glass:250, bottle:2000 },
-    { code:"LR1", name:"Chalong Bay Rum", glass:200, bottle:1400 }
-  ]
-},
-
-/* ================= NON-ALCOHOL ================= */
-
-{
-  title: "🥤 Non-Alcohol & NA",
-  items: [
-    { code:"NS1", name:"Mont Étoile Natural Mineral Water (500 ml) (PET)", glass:40, bottle:40 },
-    { code:"NS2", name:"SCHWEPPES Soda Water", glass:40, bottle:40 },
-    { code:"NS3", name:"SCHWEPPES Tonic Water", glass:40, bottle:40 },
-    { code:"NS4", name:"Coke", glass:40, bottle:40 },
-    { code:"NS5", name:"Spritz", glass:40, bottle:40 },
-
-    { code:"NW1", name:"Enjoy It NA Cabernet", glass:300, bottle:1485 },
-    { code:"NW2", name:"Enjoy It NA Sauvignon Blanc", glass:300, bottle:1485 },
-    { code:"NW3", name:"Enjoy It NA Sparkling", glass:300, bottle:1485 },
-
-    { code:"NL1", name:"Sober Spirits Gin", glass:350, bottle:2999 }
-  ]
+function setProgress(data) {
+  document.getElementById('progress').textContent = `Progress: ${data.progress}%`;
+  document.getElementById('counts').textContent =
+    `Processed: ${data.processed} / ${data.total} · Errors: ${data.error_count} · ETA: ${data.estimated_completion}`;
 }
 
-];
-
-
-let all=[];
-const menu=document.getElementById("menu");
-
-/* ===== RENDER ===== */
-categories.forEach(cat=>{
-  menu.innerHTML+=`<div class="section ${cat.wine?'wine':''}">
-    <div class="section-title">${cat.title}</div>`;
-  cat.items.forEach(it=>{
-    const i=all.length;
-    all.push(it);
-    menu.innerHTML+=`
-      <div class="item">
-        <div class="item-top">
-          <div class="code">${it.code}</div>
-          <div>
-            <div class="name">${it.name}</div>
-            <div class="price">฿${it.glass} / glass · ฿${it.bottle} / bottle</div>
-          </div>
-        </div>
-        <div class="qty">
-          <div class="qty-block">
-            <div class="qty-label">Glass</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'g',-1)">−</button>
-              <div class="qty-val" id="g${i}">0</div>
-              <button class="btn" onclick="chg(${i},'g',1)">+</button>
-            </div>
-          </div>
-          <div class="qty-block">
-            <div class="qty-label">Bottle</div>
-            <div class="qty-row">
-              <button class="btn" onclick="chg(${i},'b',-1)">−</button>
-              <div class="qty-val" id="b${i}">0</div>
-              <button class="btn" onclick="chg(${i},'b',1)">+</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
+function renderPreview(rows) {
+  const body = document.querySelector('#previewTable tbody');
+  body.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.sku || r.SKU || ''}</td>
+      <td>${r.product_name_standard || r.product_name || r.name || ''}</td>
+      <td>${r.category || ''}</td>
+      <td>${r.style || ''}</td>
+      <td>${r.classification || ''}</td>
+      <td>${r.country || ''}</td>
+      <td>${r.region || ''}</td>
+      <td>${r.confidence_score ?? ''}</td>`;
+    body.appendChild(tr);
   });
-  menu.innerHTML+=`</div>`;
+}
+
+function renderLogs(rows) {
+  const body = document.querySelector('#logTable tbody');
+  body.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.batch_id}</td><td>${r.sku}</td><td>${r.status}</td>
+      <td>${r.confidence_score}</td><td>${r.token_usage}</td>
+      <td>${r.error_message || ''}</td><td>${r.timestamp}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+runBtn.addEventListener('click', async () => {
+  const file = document.getElementById('file').files[0];
+  const batchSize = document.getElementById('batchSize').value || 20;
+  if (!file) { alert('Please upload a CSV file.'); return; }
+
+  runBtn.disabled = true;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('batch_size', batchSize);
+
+  try {
+    const res = await fetch('/api/process', { method:'POST', body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Processing failed');
+
+    setProgress(data);
+    renderPreview(data.preview || []);
+    renderLogs(data.logs || []);
+    document.getElementById('outLink').href = data.output_file;
+    document.getElementById('logLink').href = data.log_file;
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    runBtn.disabled = false;
+  }
 });
-
-/* ===== LOGIC ===== */
-function chg(i,t,d){
-  const el=document.getElementById(t+i);
-  el.innerText=Math.max(0,Number(el.innerText)+d);
-  liveUpdate();
-}
-
-function liveUpdate(){
-  let items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    items+=g+b;
-    sub+=g*m.glass+b*m.bottle;
-  });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  document.getElementById("items").innerText=items;
-  document.getElementById("subtotal").innerText=sub;
-  document.getElementById("discount").innerText=disc;
-  document.getElementById("final").innerText=sub-disc;
-}
-
-function updateSummary(){
-  const staff=document.getElementById("staff").value;
-  if(!staff){alert("Select staff");return;}
-  let list=[],items=0,sub=0;
-  all.forEach((m,i)=>{
-    const g=+document.getElementById("g"+i).innerText;
-    const b=+document.getElementById("b"+i).innerText;
-    if(g||b){
-      list.push(`${m.code} G:${g} B:${b}`);
-      items+=g+b;
-      sub+=g*m.glass+b*m.bottle;
-    }
-  });
-  const disc=document.getElementById("member").checked?sub*0.25:0;
-  const total=sub-disc;
-
-  const payload={
-    timestamp:new Date().toLocaleString(),
-    order_id:"EVT-"+Date.now(),
-    staff,
-    total_items:items,
-    subtotal:sub,
-    discount:disc,
-    final_total:total,
-    member:document.getElementById("member").checked?"YES":"NO",
-    order_detail:list.join(", ")
-  };
-
-  const box=document.getElementById("orderSummary");
-  box.style.display="block";
-  box.innerHTML=`
-    <strong>${staff}</strong><br><br>
-    ${list.join("<br>")}<br><br>
-    <strong>Total ฿${total}</strong>
-    <button class="submit" onclick='submitOrder(${JSON.stringify(payload)})'>SUBMIT ORDER</button>`;
-}
-
-function submitOrder(p){
-  fetch(SHEET_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)})
-  .then(()=>location.reload())
-  .catch(()=>{
-    const q=JSON.parse(localStorage.getItem(OFFLINE_KEY)||"[]");
-    q.push(p);
-    localStorage.setItem(OFFLINE_KEY,JSON.stringify(q));
-    document.getElementById("offline").style.display="block";
-  });
-}
 </script>
 </body>
 </html>
-

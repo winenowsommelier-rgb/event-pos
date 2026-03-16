@@ -1,338 +1,231 @@
+import cgi
+import csv
+import io
 import json
-import math
 import os
-from dataclasses import dataclass
+import uuid
 from datetime import datetime
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
+from urllib import request
 
-import gradio as gr
-import pandas as pd
+BASE_DIR = Path(__file__).parent
+OUTPUT_DIR = BASE_DIR / "outputs"
+OUTPUT_DIR.mkdir(exist_ok=True)
 
-try:
-    import google.generativeai as genai
-except ImportError:  # pragma: no cover
-    genai = None
-
-OUTPUT_FILE = "product_intelligence_output.csv"
-LOG_FILE = "processing_log.csv"
-
-SYSTEM_PROMPT = """
-You are a product intelligence engine for beverage catalog enrichment.
-Return ONLY valid JSON using this exact schema:
-{
-  "product_name_standard": "string",
-  "category": "Wine|Spirit|Beer|Sake|Accessory|Other",
-  "style": "string",
-  "classification": "string",
-  "country": "string",
-  "region": "string",
-  "sub_region": "string",
-  "short_description_en": "string",
-  "short_description_th": "string",
-  "confidence_score": 0.0,
-  "remark": "string"
-}
-If information is missing, infer conservatively and explain in remark.
-""".strip()
-
-TAXONOMY = {
-    "category": ["Wine", "Spirit", "Beer", "Sake", "Accessory", "Other"],
-}
+ALLOWED_CATEGORIES = {"Wine", "Spirit", "Beer", "Sake", "Accessory", "Other"}
 
 
-@dataclass
-class ProcessingState:
-    total_rows: int = 0
-    processed_rows: int = 0
-    error_count: int = 0
-    started_at: Optional[datetime] = None
-
-
-def configure_model() -> Optional[Any]:
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key or genai is None:
-        return None
-    genai.configure(api_key=api_key)
-    return genai.GenerativeModel("gemini-1.5-flash")
-
-
-def _extract_text(response: Any) -> str:
-    if hasattr(response, "text") and response.text:
-        return response.text.strip()
-    if hasattr(response, "candidates"):
-        parts = []
-        for candidate in response.candidates:
-            content = getattr(candidate, "content", None)
-            if not content:
-                continue
-            for part in getattr(content, "parts", []):
-                txt = getattr(part, "text", "")
-                if txt:
-                    parts.append(txt)
-        return "\n".join(parts).strip()
-    return ""
-
-
-def _strip_json_fence(text: str) -> str:
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1] if "\n" in text else text
-    if text.endswith("```"):
-        text = text.rsplit("```", 1)[0]
-    return text.strip()
-
-
-def validate_output(payload: Dict[str, Any]) -> Dict[str, Any]:
-    required = [
-        "product_name_standard",
-        "category",
-        "style",
-        "classification",
-        "country",
-        "region",
-        "sub_region",
-        "short_description_en",
-        "short_description_th",
-        "confidence_score",
-        "remark",
-    ]
-    clean = {}
-    for key in required:
-        clean[key] = payload.get(key, "")
-
+def normalize_record(raw: Dict[str, Any]) -> Dict[str, Any]:
+    out = {
+        "product_name_standard": str(raw.get("product_name_standard", "")).strip(),
+        "category": str(raw.get("category", "Other")).strip() or "Other",
+        "style": str(raw.get("style", "")).strip(),
+        "classification": str(raw.get("classification", "")).strip(),
+        "country": str(raw.get("country", "")).strip(),
+        "region": str(raw.get("region", "")).strip(),
+        "sub_region": str(raw.get("sub_region", "")).strip(),
+        "short_description_en": str(raw.get("short_description_en", "")).strip(),
+        "short_description_th": str(raw.get("short_description_th", "")).strip(),
+        "confidence_score": raw.get("confidence_score", 0),
+        "remark": str(raw.get("remark", "")).strip(),
+    }
     try:
-        clean["confidence_score"] = float(clean["confidence_score"])
+        out["confidence_score"] = max(0.0, min(1.0, float(out["confidence_score"])))
     except (TypeError, ValueError):
-        clean["confidence_score"] = 0.0
-
-    clean["confidence_score"] = max(0.0, min(1.0, clean["confidence_score"]))
-
-    if clean["category"] not in TAXONOMY["category"]:
-        clean["category"] = "Other"
-    return clean
+        out["confidence_score"] = 0.0
+    if out["category"] not in ALLOWED_CATEGORIES:
+        out["category"] = "Other"
+    return out
 
 
-def build_prompt(row: pd.Series) -> str:
-    return (
-        f"Product row:\n{row.to_json(force_ascii=False)}\n\n"
-        "Infer product category/style/classification, geography, and short bilingual descriptions."
-    )
-
-
-def mock_enrichment(row: pd.Series) -> Dict[str, Any]:
-    name = str(row.get("product_name", row.get("name", "Unknown Product")))
-    name_lower = name.lower()
-
-    if any(k in name_lower for k in ["cabernet", "merlot", "chardonnay", "pinot", "wine"]):
+def fallback_enrich(product: Dict[str, str]) -> Dict[str, Any]:
+    name = (product.get("product_name") or product.get("name") or "Unknown Product").strip()
+    lower = name.lower()
+    if any(k in lower for k in ["cabernet", "merlot", "chardonnay", "pinot", "wine"]):
         category = "Wine"
-    elif any(k in name_lower for k in ["whisky", "gin", "rum", "vodka", "tequila", "cognac"]):
+    elif any(k in lower for k in ["whisky", "gin", "rum", "vodka", "tequila", "cognac"]):
         category = "Spirit"
-    elif "beer" in name_lower:
+    elif "beer" in lower:
         category = "Beer"
-    elif "sake" in name_lower:
+    elif "sake" in lower:
         category = "Sake"
-    elif any(k in name_lower for k in ["glass", "opener", "accessory"]):
+    elif any(k in lower for k in ["glass", "opener", "accessory"]):
         category = "Accessory"
     else:
         category = "Other"
-
     return {
         "product_name_standard": name.title(),
         "category": category,
-        "style": "Unknown Style",
+        "style": category,
         "classification": "Unspecified",
-        "country": str(row.get("country", "Unknown")),
-        "region": str(row.get("region", "Unknown")),
-        "sub_region": str(row.get("sub_region", "")),
-        "short_description_en": f"{name.title()} suitable for catalog enrichment.",
-        "short_description_th": f"{name.title()} สำหรับการจัดหมวดหมู่สินค้า",
-        "confidence_score": 0.65,
-        "remark": "Generated by fallback mode (no Gemini API key).",
+        "country": product.get("country", "Unknown"),
+        "region": product.get("region", "Unknown"),
+        "sub_region": product.get("sub_region", ""),
+        "short_description_en": f"{name.title()} for product catalog enrichment.",
+        "short_description_th": f"{name.title()} สำหรับการเสริมข้อมูลสินค้า",
+        "confidence_score": 0.62,
+        "remark": "Fallback enrichment used.",
     }
 
 
-def enrich_row(row: pd.Series, model: Optional[Any]) -> Tuple[Dict[str, Any], float, Optional[int], str]:
-    if model is None:
-        payload = mock_enrichment(row)
-        return payload, payload["confidence_score"], None, "success"
+def call_gemini(product: Dict[str, str]) -> Tuple[Dict[str, Any], int]:
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing GEMINI_API_KEY")
 
-    prompt = build_prompt(row)
-    response = model.generate_content([SYSTEM_PROMPT, prompt])
-    raw = _strip_json_fence(_extract_text(response))
-    payload = validate_output(json.loads(raw))
+    prompt = {
+        "contents": [{"parts": [{"text": "Return only JSON with required fields. Input: " + json.dumps(product, ensure_ascii=False)}]}]
+    }
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + api_key
+    req = request.Request(url, data=json.dumps(prompt).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+    with request.urlopen(req, timeout=30) as resp:  # nosec B310
+        payload = json.loads(resp.read().decode("utf-8"))
 
-    token_usage = None
-    usage_meta = getattr(response, "usage_metadata", None)
-    if usage_meta:
-        token_usage = int(getattr(usage_meta, "total_token_count", 0))
+    text = payload["candidates"][0]["content"]["parts"][0]["text"].strip()
+    if text.startswith("```"):
+        text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+    usage = int(payload.get("usageMetadata", {}).get("totalTokenCount", 0))
+    return normalize_record(json.loads(text)), usage
 
-    return payload, payload["confidence_score"], token_usage, "success"
 
-
-def process_batch(batch_df: pd.DataFrame, model: Optional[Any], batch_id: int) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-    results: List[Dict[str, Any]] = []
+def process_batch(rows: List[Dict[str, str]], batch_id: int) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    enriched_rows: List[Dict[str, Any]] = []
     logs: List[Dict[str, Any]] = []
-
-    for _, row in batch_df.iterrows():
-        sku = row.get("sku", row.get("SKU", ""))
+    for row in rows:
+        sku = row.get("sku") or row.get("SKU") or ""
         now = datetime.utcnow().isoformat()
         try:
-            payload, confidence, token_usage, status = enrich_row(row, model)
-            enriched = {**row.to_dict(), **payload}
-            results.append(enriched)
-            logs.append(
-                {
-                    "batch_id": batch_id,
-                    "sku": sku,
-                    "status": status,
-                    "confidence_score": confidence,
-                    "token_usage": token_usage,
-                    "error_message": "",
-                    "timestamp": now,
-                }
-            )
+            try:
+                enriched, token_usage = call_gemini(row)
+                status = "success"
+            except Exception:
+                enriched = normalize_record(fallback_enrich(row))
+                token_usage = 0
+                status = "fallback"
+            enriched_rows.append({**row, **enriched})
+            logs.append({"batch_id": batch_id, "sku": sku, "status": status, "confidence_score": enriched["confidence_score"], "token_usage": token_usage, "error_message": "", "timestamp": now})
         except Exception as exc:  # pylint: disable=broad-except
-            logs.append(
-                {
-                    "batch_id": batch_id,
-                    "sku": sku,
-                    "status": "error",
-                    "confidence_score": 0,
-                    "token_usage": None,
-                    "error_message": str(exc),
-                    "timestamp": now,
-                }
-            )
-    return results, logs
+            logs.append({"batch_id": batch_id, "sku": sku, "status": "error", "confidence_score": 0, "token_usage": 0, "error_message": str(exc), "timestamp": now})
+    return enriched_rows, logs
 
 
-def estimate_eta(state: ProcessingState) -> str:
-    if not state.started_at or state.processed_rows == 0:
-        return "Estimating..."
-    elapsed = (datetime.utcnow() - state.started_at).total_seconds()
-    avg_per_row = elapsed / state.processed_rows
-    remaining = state.total_rows - state.processed_rows
-    eta_sec = int(max(0, remaining * avg_per_row))
-    return f"~{eta_sec}s"
-
-
-def run_pipeline(file_obj: Any, batch_size: int, progress=gr.Progress(track_tqdm=False)):
-    if file_obj is None:
-        raise gr.Error("Please upload a CSV file before running AI analysis.")
-
-    df = pd.read_csv(file_obj.name)
-    if df.empty:
-        raise gr.Error("Uploaded CSV is empty.")
-
-    model = configure_model()
-    total = len(df)
-    state = ProcessingState(total_rows=total, processed_rows=0, error_count=0, started_at=datetime.utcnow())
-
-    all_results: List[Dict[str, Any]] = []
+def process_rows(rows: List[Dict[str, str]], batch_size: int) -> Dict[str, Any]:
+    all_enriched: List[Dict[str, Any]] = []
     all_logs: List[Dict[str, Any]] = []
+    size = max(1, batch_size)
+    for i in range(0, len(rows), size):
+        batch_id = (i // size) + 1
+        enriched, logs = process_batch(rows[i:i + size], batch_id)
+        all_enriched.extend(enriched)
+        all_logs.extend(logs)
 
-    num_batches = math.ceil(total / batch_size)
+    run_id = uuid.uuid4().hex[:10]
+    out_name = f"{run_id}_product_intelligence_output.csv"
+    log_name = f"{run_id}_processing_log.csv"
 
-    for batch_idx in range(num_batches):
-        start = batch_idx * batch_size
-        end = min((batch_idx + 1) * batch_size, total)
-        batch_df = df.iloc[start:end]
-        batch_results, batch_logs = process_batch(batch_df, model, batch_idx + 1)
+    with (OUTPUT_DIR / out_name).open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(all_enriched[0].keys()))
+        writer.writeheader()
+        writer.writerows(all_enriched)
 
-        all_results.extend(batch_results)
-        all_logs.extend(batch_logs)
+    with (OUTPUT_DIR / log_name).open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(all_logs[0].keys()))
+        writer.writeheader()
+        writer.writerows(all_logs)
 
-        state.processed_rows = end
-        state.error_count = sum(1 for r in all_logs if r["status"] == "error")
-
-        progress(end / total, desc=f"Processing batch {batch_idx + 1}/{num_batches}")
-
-        result_df = pd.DataFrame(all_results)
-        log_df = pd.DataFrame(all_logs)
-
-        progress_md = (
-            f"**Progress:** {int((end / total) * 100)}%\n\n"
-            f"**Processed:** {state.processed_rows} / {state.total_rows}  \n"
-            f"**Estimated completion:** {estimate_eta(state)}  \n"
-            f"**Errors:** {state.error_count}"
-        )
-
-        output_path = None
-        log_path = None
-        if not result_df.empty:
-            result_df.to_csv(OUTPUT_FILE, index=False)
-            output_path = OUTPUT_FILE
-        if not log_df.empty:
-            log_df.to_csv(LOG_FILE, index=False)
-            log_path = LOG_FILE
-
-        yield progress_md, result_df.head(100), log_df.tail(200), output_path, log_path
+    return {
+        "progress": 100,
+        "processed": len(all_enriched),
+        "total": len(rows),
+        "error_count": sum(1 for x in all_logs if x["status"] == "error"),
+        "estimated_completion": "done",
+        "preview": all_enriched[:50],
+        "logs": all_logs[-100:],
+        "output_file": f"/download/{out_name}",
+        "log_file": f"/download/{log_name}",
+    }
 
 
-def build_ui() -> gr.Blocks:
-    with gr.Blocks(theme=gr.themes.Soft(), title="Wine-Now / LIQ9 Product Intelligence Engine") as demo:
-        gr.Markdown(
-            """
-            # Wine-Now / LIQ9  
-            ## Product Intelligence Engine
-            Upload your product catalog and generate structured product intelligence with AI.
-            """
-        )
+class Handler(BaseHTTPRequestHandler):
+    def _send_json(self, payload: Dict[str, Any], status: int = 200):
+        raw = json.dumps(payload).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
 
-        with gr.Group():
-            gr.Markdown("### Section 1 — Upload Dataset")
-            with gr.Row():
-                file_input = gr.File(label="Upload Product CSV", file_types=[".csv"])
-                batch_size = gr.Number(label="Batch Size", value=20, minimum=1, precision=0)
-            run_btn = gr.Button("Run AI Analysis", variant="primary")
+    def do_GET(self):
+        if self.path == "/":
+            body = (BASE_DIR / "index.html").read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
 
-        with gr.Group():
-            gr.Markdown("### Section 2 — Progress Monitor")
-            progress_md = gr.Markdown("Progress: 0%")
+        if self.path.startswith("/download/"):
+            filename = self.path.split("/download/", 1)[1]
+            path = OUTPUT_DIR / filename
+            if path.exists() and path.is_file():
+                body = path.read_bytes()
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/csv")
+                self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+                return
+        self.send_error(HTTPStatus.NOT_FOUND)
 
-        with gr.Group():
-            gr.Markdown("### Section 3 — Live Result Preview")
-            preview = gr.Dataframe(
-                label="Enriched Product Preview",
-                headers=[
-                    "SKU",
-                    "Product Name",
-                    "Category",
-                    "Style",
-                    "Classification",
-                    "Country",
-                    "Region",
-                    "Confidence",
-                ],
-                wrap=True,
-                interactive=False,
-            )
+    def do_POST(self):
+        if self.path != "/api/process":
+            self.send_error(HTTPStatus.NOT_FOUND)
+            return
 
-        with gr.Group():
-            gr.Markdown("### Section 4 — Download Results")
-            out_file = gr.File(label="Download Enriched CSV")
-            log_file = gr.File(label="Download Processing Log")
+        ctype, pdict = cgi.parse_header(self.headers.get("content-type", ""))
+        if ctype != "multipart/form-data":
+            self._send_json({"error": "multipart/form-data required"}, 400)
+            return
 
-        with gr.Group():
-            gr.Markdown("### Section 5 — Processing Logs")
-            logs_table = gr.Dataframe(
-                headers=["batch_id", "sku", "status", "confidence_score", "token_usage", "error_message", "timestamp"],
-                interactive=False,
-                wrap=True,
-                label="Processing Logs",
-            )
+        pdict["boundary"] = bytes(pdict["boundary"], "utf-8")
+        form = cgi.parse_multipart(self.rfile, pdict)
 
-        run_btn.click(
-            fn=run_pipeline,
-            inputs=[file_input, batch_size],
-            outputs=[progress_md, preview, logs_table, out_file, log_file],
-        )
+        files = form.get("file")
+        batch_sizes = form.get("batch_size", ["20"])
+        if not files:
+            self._send_json({"error": "Please upload a CSV file."}, 400)
+            return
 
-    return demo
+        try:
+            batch_size = int(batch_sizes[0])
+        except (TypeError, ValueError):
+            batch_size = 20
+
+        csv_data = files[0]
+        if isinstance(csv_data, bytes):
+            csv_text = csv_data.decode("utf-8")
+        else:
+            csv_text = str(csv_data)
+
+        rows = list(csv.DictReader(io.StringIO(csv_text)))
+        if not rows:
+            self._send_json({"error": "CSV contains no rows."}, 400)
+            return
+
+        result = process_rows(rows, batch_size)
+        self._send_json(result, 200)
 
 
-demo = build_ui()
+def run_server():
+    server = ThreadingHTTPServer(("0.0.0.0", 7860), Handler)
+    print("Server running on http://0.0.0.0:7860")
+    server.serve_forever()
+
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    run_server()
