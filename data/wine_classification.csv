@@ -1,0 +1,11 @@
+classification_id,country,classification_level,sub_classification,description,parent_id
+1,france,aop,cru_or_village,french quality ladder with communal and cru tiers,
+2,italy,doc_docg,docg_or_doc,italian denomination system with controlled origin tiers,
+3,spain,do_doca,do_or_doca,spanish protected denomination system,
+4,portugal,doc,regional_or_doc,portuguese denomination and regional indications,
+5,usa,ava_gi,ava_or_sub_ava,american viticultural areas and nested sub-avas,
+6,argentina,gi_do,valley_or_district,argentine geographical indications by valley/district,
+7,chile,gi_do,valley_or_district,chilean denomination by region/valley/coast,
+8,australia,ava_gi,ava_or_sub_ava,geographical indications and subregions,
+9,new_zealand,ava_gi,ava_or_sub_ava,regional gis with recognized subregions,
+10,germany,pradikatswein,grosse_lage_or_village,german quality and classified vineyard hierarchy,
