@@ -23,8 +23,17 @@ create table wine_region (
   country text not null,
   region text not null,
   subregion text,
-  appellation text,
-  classification_level text
+  classification_level text,
+  sub_classification text
+);
+
+create table wine_classification (
+  classification_id integer primary key,
+  country text not null,
+  classification_level text not null,
+  sub_classification text,
+  description text,
+  parent_id integer
 );
 
 create table wine_style (
@@ -113,3 +122,5 @@ create index idx_product_master_grape on product_master(grape_variety);
 create index idx_product_master_wine_style on product_master(wine_style);
 create index idx_product_master_spirit_style on product_master(spirit_style);
 create index idx_product_master_type on product_master(product_type);
+
+create index idx_wine_region_country_region on wine_region(country, region);

@@ -140,7 +140,8 @@ const schema = {
   product_master:['product_id','sku','product_name','brand','producer','product_type','category','sub_category','country','region','subregion','appellation','grape_variety','grape_class','wine_style','spirit_style','flavor_profile','food_pairing','alcohol','vintage','bottle_size','price_segment','critic_score','critic_source','taste_vector','pairing_vector','recommendation_score'],
   wine_type:['wine_type_id','wine_type','description'],
   grape_variety:['grape_id','grape_name','grape_class','origin_country','primary_regions','typical_style','body','acidity','tannin'],
-  wine_region:['region_id','country','region','subregion','appellation','classification_level'],
+  wine_region:['region_id','country','region','subregion','classification_level','sub_classification'],
+  wine_classification:['classification_id','country','classification_level','sub_classification','description','parent_id'],
   wine_style:['style_id','style_name','body','acidity','tannin','sweetness','typical_grapes'],
   wine_flavor_profile:['flavor_id','flavor_tag','flavor_category'],
   wine_food_pairing:['pairing_id','food_name','food_category','recommended_wine_style','recommended_grape','pairing_reason'],
@@ -169,9 +170,15 @@ const seedData = {
     {grape_id:'3',grape_name:'riesling',grape_class:'white',origin_country:'germany',primary_regions:'mosel',typical_style:'lime_floral_mineral',body:'light',acidity:'high',tannin:'low'}
   ],
   wine_region:[
-    {region_id:'1',country:'france',region:'bordeaux',subregion:'medoc',appellation:'margaux',classification_level:'appellation'},
-    {region_id:'2',country:'italy',region:'tuscany',subregion:'chianti_classico',appellation:'greve',classification_level:'appellation'},
-    {region_id:'3',country:'usa',region:'napa_valley',subregion:'oakville',appellation:'oakville_ava',classification_level:'ava'}
+    {region_id:'1',country:'france',region:'bordeaux',subregion:'medoc',classification_level:'aop',sub_classification:'cru_or_village'},
+    {region_id:'2',country:'italy',region:'tuscany',subregion:'chianti_classico',classification_level:'doc_docg',sub_classification:'docg_or_doc'},
+    {region_id:'3',country:'usa',region:'napa_valley',subregion:'oakville',classification_level:'ava_gi',sub_classification:'ava_or_sub_ava'}
+  ],
+
+  wine_classification:[
+    {classification_id:'1',country:'france',classification_level:'aop',sub_classification:'cru_or_village',description:'french_quality_hierarchy',parent_id:''},
+    {classification_id:'2',country:'italy',classification_level:'doc_docg',sub_classification:'docg_or_doc',description:'italian_denomination_hierarchy',parent_id:''},
+    {classification_id:'3',country:'usa',classification_level:'ava_gi',sub_classification:'ava_or_sub_ava',description:'american_ava_hierarchy',parent_id:''}
   ],
   wine_style:[
     {style_id:'1',style_name:'full_red',body:'full',acidity:'medium',tannin:'high',sweetness:'dry',typical_grapes:'cabernet_sauvignon|syrah'},

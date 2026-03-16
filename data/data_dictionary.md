@@ -28,8 +28,9 @@
 
 ## wine dimensions
 - `wine_type`: broad wine taxonomy labels.
-- `grape_variety`: 140 grape records with structure and sensory dimensions.
-- `wine_region`: 450 hierarchical geography rows for global filtering.
+- `grape_variety`: major grape records with structure and sensory dimensions.
+- `wine_region`: practical geography rows with `country`, `region`, `subregion`, plus `classification_level` and `sub_classification`.
+- `wine_classification`: country-level reference for legal/quality hierarchy (e.g., AOP, DOCG, AVA) and sub tiers.
 - `wine_style`: core style templates for faceting and recommendation defaults.
 - `wine_flavor_profile`: standardized flavor tags and flavor categories.
 - `wine_food_pairing`: cuisine-to-style pairing matrix with rationale.
