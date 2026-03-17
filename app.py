@@ -21,6 +21,44 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 ALLOWED_CATEGORIES = {"Wine", "Spirit", "Beer", "Sake", "Accessory", "Other"}
 MAX_WEB_CONTEXT_CHARS = 3500
 
+INPUT_DEFAULTS = {
+    "sku": "",
+    "SKU": "",
+    "product_name": "",
+    "name": "",
+    "country": "",
+    "region": "",
+    "sub_region": "",
+    "source_url": "",
+    "url": "",
+    "product_url": "",
+    "link": "",
+}
+
+OUTPUT_FIELDS = [
+    "product_name_standard",
+    "category",
+    "style",
+    "classification",
+    "country",
+    "region",
+    "sub_region",
+    "short_description_en",
+    "short_description_th",
+    "confidence_score",
+    "remark",
+]
+
+LOG_FIELDS = [
+    "batch_id",
+    "sku",
+    "status",
+    "confidence_score",
+    "token_usage",
+    "error_message",
+    "timestamp",
+]
+
 
 def normalize_record(raw: Dict[str, Any]) -> Dict[str, Any]:
     out = {
@@ -43,6 +81,19 @@ def normalize_record(raw: Dict[str, Any]) -> Dict[str, Any]:
     if out["category"] not in ALLOWED_CATEGORIES:
         out["category"] = "Other"
     return out
+
+
+def normalize_input_row(row: Dict[str, Any]) -> Dict[str, str]:
+    normalized: Dict[str, str] = {}
+    for key, default in INPUT_DEFAULTS.items():
+        value = row.get(key, default)
+        normalized[key] = str(value).strip() if value is not None else default
+
+    for key, value in row.items():
+        if key not in normalized:
+            normalized[key] = "" if value is None else str(value).strip()
+
+    return normalized
 
 
 def fallback_enrich(product: Dict[str, str], web_context: str = "") -> Dict[str, Any]:
@@ -159,7 +210,8 @@ def process_batch(rows: List[Dict[str, str]], batch_id: int, use_web_context: bo
     enriched_rows: List[Dict[str, Any]] = []
     logs: List[Dict[str, Any]] = []
 
-    for row in rows:
+    for raw_row in rows:
+        row = normalize_input_row(raw_row)
         sku = row.get("sku") or row.get("SKU") or ""
         now = datetime.utcnow().isoformat()
         error_message = ""
@@ -225,15 +277,20 @@ def process_rows(rows: List[Dict[str, str]], batch_size: int, use_web_context: b
     out_name = f"{run_id}_product_intelligence_output.csv"
     log_name = f"{run_id}_processing_log.csv"
 
+    output_fieldnames = list(dict.fromkeys([*INPUT_DEFAULTS.keys(), *OUTPUT_FIELDS, *(all_enriched[0].keys() if all_enriched else [])]))
+    log_fieldnames = list(dict.fromkeys([*LOG_FIELDS, *(all_logs[0].keys() if all_logs else [])]))
+
     with (OUTPUT_DIR / out_name).open("w", newline="", encoding="utf-8") as out_file:
-        writer = csv.DictWriter(out_file, fieldnames=list(all_enriched[0].keys()))
+        writer = csv.DictWriter(out_file, fieldnames=output_fieldnames, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(all_enriched)
+        if all_enriched:
+            writer.writerows(all_enriched)
 
     with (OUTPUT_DIR / log_name).open("w", newline="", encoding="utf-8") as log_file:
-        writer = csv.DictWriter(log_file, fieldnames=list(all_logs[0].keys()))
+        writer = csv.DictWriter(log_file, fieldnames=log_fieldnames, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(all_logs)
+        if all_logs:
+            writer.writerows(all_logs)
 
     return {
         "progress": 100,
