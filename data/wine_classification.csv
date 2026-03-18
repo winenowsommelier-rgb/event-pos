@@ -1,0 +1,21 @@
+classification_id,country,classification_system,tier_code,tier_name,tier_rank,parent_id,description
+1,france,inao,aop,appellation_d_origine_protegee,1,,top protected origin level
+2,france,bordeaux_1855,grand_cru_classe,grand_cru_classe,2,1,classified growths in medoc and sauternes
+3,france,saint_emilion,premier_grand_cru_classe,premier_grand_cru_classe,2,1,top saint emilion estate tier
+4,italy,italian_quality_system,igt,indicazione_geografica_tipica,1,,broad geographic indication
+5,italy,italian_quality_system,doc,denominazione_di_origine_controllata,2,4,controlled designation of origin
+6,italy,italian_quality_system,docg,denominazione_di_origine_controllata_e_garantita,3,5,highest guaranteed denomination
+7,spain,spanish_quality_system,do,denominacion_de_origen,1,,standard denomination tier
+8,spain,spanish_quality_system,doca,denominacion_de_origen_calificada,2,7,highest denomination tier
+9,spain,spanish_quality_system,vino_de_pago,single_estate_denominacion,2,7,single estate protected denomination
+10,portugal,portuguese_quality_system,vr,vinho_regional,1,,regional wine category
+11,portugal,portuguese_quality_system,doc,denominacao_de_origem_controlada,2,10,controlled origin category
+12,usa,ttb_ava_system,ava,american_viticultural_area,1,,federal geographic appellation
+13,usa,ttb_ava_system,sub_ava,nested_ava,2,12,nested ava within larger ava
+14,argentina,argentine_gi_system,gi,geographical_indication,1,,argentine gi level
+15,chile,chile_do_system,do,denominacion_de_origen,1,,chilean denomination level
+16,australia,australian_gi_system,gi,geographical_indication,1,,australian gi level
+17,new_zealand,nz_gi_system,gi,geographical_indication,1,,new zealand gi level
+18,germany,german_quality_system,qualitatswein,quality_wine,1,,quality wine category
+19,germany,german_quality_system,pradikatswein,predicate_wine,2,18,higher quality category
+20,germany,vdp_classification,grosse_lage,great_site,3,19,top vdp vineyard classification
