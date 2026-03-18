@@ -1,0 +1,17 @@
+spirit_type_id,spirit_type,base_ingredient,origin
+1,whisky,grain,scotland
+2,gin,neutral_spirit_with_botanicals,england
+3,rum,sugarcane,caribbean
+4,vodka,grain_or_potato,eastern_europe
+5,tequila,blue_agave,mexico
+6,mezcal,agave,mexico
+7,cognac,grape,france
+8,brandy,fruit,global
+9,liqueur,neutral_spirit_plus_flavorings,global
+10,sake,rice,japan
+11,beer,malted_grain,global
+12,soju,rice_or_starch,korea
+13,baijiu,sorghum,china
+14,pisco,grape,peru_chile
+15,calvados,apple,france
+16,armagnac,grape,france
