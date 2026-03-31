@@ -4,9 +4,8 @@ This repository now includes a user-facing web app and a Vercel serverless API.
 
 ## Included files
 
-- `pdf_tool.html` — end-user upload UI.
+- `pdf-tool.html` — end-user upload UI.
 - `api/process.js` — serverless endpoint that receives PDF files, extracts rows, validates basic price fields, and returns a cleaned CSV file.
-- `vercel.json` — routes and function runtime configuration.
 - `package.json` — dependencies (`formidable`, `pdf-parse`).
 
 ## Deploy steps
@@ -18,9 +17,11 @@ This repository now includes a user-facing web app and a Vercel serverless API.
 5. Output directory: leave empty (static files served from repo root).
 6. Deploy.
 
+This setup relies on Vercel defaults (no custom `vercel.json`) to reduce deployment config errors.
+
 ## End-user URL paths
 
-- Main uploader page: `/pdf-tool`
+- Main uploader page: `/pdf-tool.html`
 - API endpoint: `/api/process`
 
 ## Notes
