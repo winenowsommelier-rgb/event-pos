@@ -20,8 +20,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>PDF Price List → Excel</h1>
-    <p class="muted">Upload one or more PDF price lists. The tool will return an Excel file with <strong>Clean_Data</strong>, <strong>Validation_Errors</strong>, and <strong>Audit_Log</strong>.</p>
+    <h1>PDF Price List → CSV</h1>
+    <p class="muted">Upload one or more PDF price lists. The tool returns a cleaned <strong>.csv</strong> output per uploaded file.</p>
 
     <div id="drop" class="drop">
       <input id="fileInput" type="file" accept="application/pdf" multiple />
@@ -92,7 +92,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${file.name.replace(/\\.pdf$/i, '') || 'pricelist'}_clean.xlsx`;
+      a.download = `${file.name.replace(/\\.pdf$/i, '') || 'pricelist'}_clean.csv`;
       a.click();
       URL.revokeObjectURL(url);
       log(`Downloaded: ${a.download}`);

@@ -1,6 +1,32 @@
 const formidable = require('formidable');
 const pdfParse = require('pdf-parse');
-const XLSX = require('xlsx');
+const OUTPUT_HEADERS = [
+  'item_code',
+  'item_name',
+  'pack_size',
+  'unit',
+  'currency',
+  'list_price',
+  'discount',
+  'net_price',
+  'source_file',
+  'source_page',
+  'source_row'
+];
+
+function escapeCsvValue(value) {
+  const text = value == null ? '' : String(value);
+  if (/[",\n]/.test(text)) {
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+  return text;
+}
+
+function toCsv(rows, headers) {
+  const headerLine = headers.join(',');
+  const body = rows.map((row) => headers.map((header) => escapeCsvValue(row[header])).join(',')).join('\n');
+  return body ? `${headerLine}\n${body}\n` : `${headerLine}\n`;
+}
 
 function parseRowsFromText(text, sourceFile) {
   const rows = [];
@@ -93,23 +119,16 @@ module.exports = async (req, res) => {
       errorRows.push(...parsed.errors);
     }
 
-    const auditRows = [
-      { metric: 'total_rows', value: cleanRows.length },
-      { metric: 'total_files', value: uploadedList.length },
-      { metric: 'validation_issues', value: errorRows.length }
-    ];
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(cleanRows), 'Clean_Data');
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(errorRows), 'Validation_Errors');
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(auditRows), 'Audit_Log');
-
-    const out = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    const rowsWithErrorCount = cleanRows.map((row) => ({
+      ...row,
+      validation_issues_in_file: errorRows.filter((e) => e.source_file === row.source_file).length
+    }));
+    const csv = toCsv(rowsWithErrorCount, [...OUTPUT_HEADERS, 'validation_issues_in_file']);
 
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename="pricelist_clean.xlsx"');
-    res.end(out);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="pricelist_clean.csv"');
+    res.end(csv);
   } catch (error) {
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
