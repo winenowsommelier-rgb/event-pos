@@ -20,8 +20,8 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>PDF Price List → Excel</h1>
-    <p class="muted">Upload one or more PDF price lists. The tool will return an Excel file with <strong>Clean_Data</strong>, <strong>Validation_Errors</strong>, and <strong>Audit_Log</strong>.</p>
+    <h1>PDF Price List → CSV</h1>
+    <p class="muted">Upload one or more PDF price lists. The tool returns a cleaned <strong>.csv</strong> output per uploaded file.</p>
 
     <div id="drop" class="drop">
       <input id="fileInput" type="file" accept="application/pdf" multiple />
@@ -38,6 +38,9 @@
   </div>
 
   <script>
+    const MAX_FILE_SIZE_MB = 4;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
     const fileInput = document.getElementById('fileInput');
     const runBtn = document.getElementById('runBtn');
     const statusEl = document.getElementById('status');
@@ -57,11 +60,42 @@
         return;
       }
       statusEl.textContent = `${files.length} PDF(s) selected.`;
-      filesEl.innerHTML = `<strong>Selected:</strong> ${files.map((f) => f.name).join(', ')}`;
+      filesEl.innerHTML = `<strong>Selected:</strong> ${files.map((f) => `${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)`).join(', ')}`;
     }
 
     function log(msg) {
       logEl.textContent += `${msg}\n`;
+    }
+
+    function validateFiles(files) {
+      const oversized = files.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
+      if (oversized.length > 0) {
+        const names = oversized.map((file) => file.name).join(', ');
+        throw new Error(
+          `These files are larger than ${MAX_FILE_SIZE_MB}MB and may fail with HTTP 413 on Vercel: ${names}`
+        );
+      }
+    }
+
+    async function uploadSingleFile(file, index, total) {
+      log(`Uploading file ${index + 1}/${total}: ${file.name}`);
+      const formData = new FormData();
+      formData.append('files', file);
+
+      const response = await fetch('/api/process', { method: 'POST', body: formData });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || `HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${file.name.replace(/\\.pdf$/i, '') || 'pricelist'}_clean.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      log(`Downloaded: ${a.download}`);
     }
 
     async function runProcess() {
@@ -73,27 +107,14 @@
 
       runBtn.disabled = true;
       logEl.textContent = '';
-      log(`Uploading ${files.length} file(s)...`);
-
-      const formData = new FormData();
-      files.forEach((file) => formData.append('files', file));
+      log(`Preparing ${files.length} file(s)...`);
 
       try {
-        const response = await fetch('/api/process', { method: 'POST', body: formData });
-        if (!response.ok) {
-          const payload = await response.json().catch(() => ({}));
-          throw new Error(payload.error || `HTTP ${response.status}`);
+        validateFiles(files);
+        for (let i = 0; i < files.length; i += 1) {
+          await uploadSingleFile(files[i], i, files.length);
         }
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'pricelist_clean.xlsx';
-        a.click();
-        URL.revokeObjectURL(url);
-
-        log('Done. Excel file downloaded.');
+        log('Done. All files processed successfully.');
       } catch (error) {
         log(`Error: ${error.message}`);
       } finally {

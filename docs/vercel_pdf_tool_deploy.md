@@ -5,9 +5,9 @@ This repository now includes a user-facing web app and a Vercel serverless API.
 ## Included files
 
 - `pdf_tool.html` — end-user upload UI.
-- `api/process.js` — serverless endpoint that receives PDF files, extracts rows, validates basic price fields, and returns an Excel workbook.
+- `api/process.js` — serverless endpoint that receives PDF files, extracts rows, validates basic price fields, and returns a cleaned CSV file.
 - `vercel.json` — routes and function runtime configuration.
-- `package.json` — dependencies (`formidable`, `pdf-parse`, `xlsx`).
+- `package.json` — dependencies (`formidable`, `pdf-parse`).
 
 ## Deploy steps
 
@@ -26,5 +26,6 @@ This repository now includes a user-facing web app and a Vercel serverless API.
 ## Notes
 
 - Extraction in `api/process.js` uses a heuristic parser for text-style price lists.
+- Vercel serverless requests can fail with `HTTP 413` for large uploads. The frontend now enforces a per-file size guard (4MB) and uploads files one-by-one.
 - For scanned/image PDFs, add OCR (e.g., Tesseract or external OCR API) in the API function.
 - For supplier-specific table structures, extend `parseRowsFromText` with custom patterns.
