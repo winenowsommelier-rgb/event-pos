@@ -1,0 +1,10 @@
+{
+  "name": "event-pos-pdf-tool",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vercel frontend + serverless API for PDF price-list processing",
+  "dependencies": {
+    "formidable": "^3.5.4",
+    "pdf-parse": "^1.1.1"
+  }
+}
