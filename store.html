@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WineNow — Premium Wines &amp; Spirits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2;
+    --dark: #0E0C0A;
+    --wine: #7A1F2B;
+    --wine-dark: #5a1520;
+    --gold: #BF9141;
+    --muted: #6B6460;
+    --border: #E4DDD4;
+    --white: #ffffff;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --radius: 2px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--cream);
+    color: var(--dark);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { text-decoration: none; color: inherit; }
+  button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+  /* Age Gate */
+  #age-gate {
+    position: fixed;
+    inset: 0;
+    background: rgba(14,12,10,0.96);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--transition), visibility var(--transition);
+  }
+  #age-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .age-gate-inner {
+    text-align: center;
+    padding: 60px 40px;
+    max-width: 480px;
+    border: 1px solid rgba(191,145,65,0.3);
+    background: rgba(14,12,10,0.8);
+  }
+  .age-gate-logo {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .age-gate-logo span { color: var(--wine); }
+  .age-gate-divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+    margin: 16px auto;
+  }
+  .age-gate-title {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .age-gate-text {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+  .age-gate-buttons { display: flex; gap: 12px; justify-content: center; }
+  .btn-age-yes {
+    padding: 14px 36px;
+    background: var(--wine);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: background var(--transition);
+  }
+  .btn-age-yes:hover { background: var(--wine-dark); }
+  .btn-age-no {
+    padding: 14px 36px;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.6);
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+  .btn-age-no:hover { border-color: rgba(255,255,255,0.4); color: var(--white); }
+  .age-gate-disclaimer {
+    margin-top: 24px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* Announcement Bar */
+  .announcement-bar {
+    background: var(--wine);
+    color: var(--white);
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    position: relative;
+    z-index: 100;
+  }
+  .announcement-bar span { margin: 0 16px; opacity: 0.5; }
+
+  /* Navigation */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: rgba(250,247,242,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    padding: 0 48px;
+  }
+  .nav.scrolled {
+    border-bottom-color: var(--border);
+    box-shadow: 0 4px 24px rgba(14,12,10,0.06);
+  }
+  .nav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 72px;
+    gap: 24px;
+  }
+  .nav-logo {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--dark);
+  }
+  .nav-logo span { color: var(--wine); }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--dark);
+    opacity: 0.8;
+    transition: opacity var(--transition);
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--wine);
+    transition: width var(--transition);
+  }
+  .nav-links a:hover { opacity: 1; }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: flex-end;
+  }
+  .nav-search-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    color: var(--dark);
+    transition: background var(--transition);
+  }
+  .nav-search-btn:hover { background: var(--border); }
+  .nav-cart-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: var(--dark);
+    color: var(--white);
+    border-radius: var(--radius);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    transition: background var(--transition);
+    position: relative;
+  }
+  .nav-cart-btn:hover { background: var(--wine); }
+  .cart-count {
+    background: var(--wine);
+    color: var(--white);
+    font-size: 0.65rem;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 2px;
+    transition: background var(--transition);
+  }
+  .nav-cart-btn:hover .cart-count { background: var(--white); color: var(--wine); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 80px 80px 80px;
+    max-width: 700px;
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--wine);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--wine);
+  }
+  .hero-headline {
+    font-family: var(--font-serif);
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--dark);
+    margin-bottom: 24px;
+    letter-spacing: -0.01em;
+  }
+  .hero-headline em {
+    font-style: italic;
+    color: var(--wine);
+  }
+  .hero-body {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 420px;
+    line-height: 1.75;
+    margin-bottom: 40px;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 32px;
+    background: var(--dark);
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+  .btn-primary:hover { background: var(--wine); transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 32px;
+    border: 1px solid var(--dark);
+    color: var(--dark);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+  .btn-ghost:hover { background: var(--dark); color: var(--white); }
+  .hero-right {
+    background: linear-gradient(145deg, #3d0a12 0%, #1a0509 50%, #0e0c0a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+  }
+  .hero-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(122,31,43,0.4) 0%, transparent 70%);
+  }
+  .hero-bottle-wrap {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+  }
+  .hero-bottle-svg {
+    width: 120px;
+    opacity: 0.9;
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,0.5));
+    animation: bottleFloat 6s ease-in-out infinite;
+  }
+  @keyframes bottleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero-right-text {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-right-text p {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .hero-right-accent {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, rgba(191,145,65,0.6), transparent);
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Stats Bar */
+  .stats-bar {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 0;
+  }
+  .stats-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .stat-item {
+    padding: 40px 32px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    transition: background var(--transition);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-item:hover { background: var(--cream); }
+  .stat-number {
+    font-family: var(--font-serif);
+    font-size: 2.5rem;
+    font-weight: 500;
+    color: var(--dark);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-number span { color: var(--wine); }
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Section Common */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 48px;
+  }
+  .section-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 400;
+    color: var(--dark);
+  }
+  .section-link {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--wine);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: gap var(--transition);
+  }
+  .section-link:hover { gap: 10px; }
+
+  /* Journal Section */
+  .journal-section {
+    background: var(--white);
+    padding: 96px 48px;
+  }
+  .journal-inner { max-width: 1400px; margin: 0 auto; }
+  .journal-feature-grid {
+    display: grid;
+    grid-template-columns: 60% 1fr;
+    gap: 2px;
+    margin-bottom: 2px;
+  }
+  .journal-feature {
+    background: linear-gradient(160deg, #3d0a12 0%, #1a0509 60%, #0e0c0a 100%);
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 460px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform var(--transition);
+  }
+  .journal-feature:hover { transform: scale(1.005); }
+  .journal-feature::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(14,12,10,0.9) 0%, rgba(14,12,10,0.1) 60%, transparent 100%);
+  }
+  .journal-feature-content { position: relative; z-index: 2; }
+  .journal-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    background: var(--wine);
+    color: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+  }
+  .journal-feature-title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .journal-feature-excerpt {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    margin-bottom: 24px;
+    max-width: 480px;
+  }
+  .journal-read-more {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap var(--transition);
+  }
+  .journal-read-more:hover { gap: 14px; }
+  .journal-side-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .journal-side-card {
+    background: var(--cream);
+    padding: 36px 32px;
+    flex: 1;
+    cursor: pointer;
+    transition: background var(--transition);
+    border-left: 3px solid transparent;
+    transition: all var(--transition);
+  }
+  .journal-side-card:hover { background: var(--border); border-left-color: var(--wine); }
+  .journal-side-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--dark);
+    line-height: 1.3;
+    margin: 10px 0 8px;
+  }
+  .journal-side-meta {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .journal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 2px;
+  }
+  .journal-card {
+    padding: 48px 40px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .journal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(14,12,10,0.85) 0%, transparent 60%);
+  }
+  .journal-card-bg-wine { background: linear-gradient(160deg, #5a1520 0%, #2d0a0f 100%); }
+  .journal-card-bg-amber { background: linear-gradient(160deg, #6b3e10 0%, #2d1a06 100%); }
+  .journal-card-bg-purple { background: linear-gradient(160deg, #2d1040 0%, #0e0818 100%); }
+  .journal-card-content { position: relative; z-index: 2; }
+  .journal-card-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.3;
+    margin: 10px 0 0;
+  }
+
+  /* Sommelier's Selection */
+  .sommelier-section {
+    background: var(--cream);
+    padding: 96px 48px;
+  }
+  .sommelier-inner { max-width: 1400px; margin: 0 auto; }
+  .sommelier-header-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 64px;
+    align-items: start;
+    margin-bottom: 64px;
+  }
+  .sommelier-card {
+    background: var(--wine);
+    padding: 48px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sommelier-card::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .sommelier-quote-mark {
+    font-family: var(--font-serif);
+    font-size: 5rem;
+    color: rgba(255,255,255,0.15);
+    line-height: 1;
+    margin-bottom: -16px;
+  }
+  .sommelier-quote {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .sommelier-attribution {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+  .sommelier-intro-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--wine);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sommelier-intro-eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--wine);
+  }
+  .sommelier-intro-title {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--dark);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .sommelier-intro-text {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 520px;
+  }
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+  }
+  .product-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+  }
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(14,12,10,0.12);
+    border-color: var(--wine);
+  }
+  .product-image {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .product-img-red { background: linear-gradient(160deg, #4a1020 0%, #1a0508 100%); }
+  .product-img-white { background: linear-gradient(160deg, #7a6a30 0%, #2d2510 100%); }
+  .product-img-sparkling { background: linear-gradient(160deg, #1a3040 0%, #0a1520 100%); }
+  .product-img-whisky { background: linear-gradient(160deg, #6b3e10 0%, #2a1806 100%); }
+  .product-bottle-icon {
+    width: 60px;
+    opacity: 0.7;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));
+  }
+  .product-body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+  .product-category {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--wine);
+    margin-bottom: 8px;
+  }
+  .product-name {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+  .product-vintage {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .product-note {
+    font-family: var(--font-serif);
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+    flex: 1;
+  }
+  .product-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .product-price-bottle {
+    font-family: var(--font-serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .product-price-glass {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .btn-add-cart {
+    width: 100%;
+    padding: 12px;
+    background: var(--dark);
+    color: var(--white);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: background var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-add-cart:hover { background: var(--wine); }
+
+  /* Collections Grid */
+  .collections-section {
+    background: var(--white);
+    padding: 96px 48px;
+  }
+  .collections-inner { max-width: 1400px; margin: 0 auto; }
+  .collections-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+  .collection-tile {
+    padding: 48px 40px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border-radius: var(--radius);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--transition);
+  }
+  .collection-tile:hover { transform: translateY(-3px); }
+  .collection-tile.large { grid-column: span 2; min-height: 300px; }
+  .collection-bg-red { background: linear-gradient(145deg, #5a1520 0%, #2d0a0f 60%, #1a0508 100%); }
+  .collection-bg-white { background: linear-gradient(145deg, #8a7a35 0%, #4a3d18 100%); }
+  .collection-bg-sparkling { background: linear-gradient(145deg, #7a3a4a 0%, #3d1a22 100%); }
+  .collection-bg-whisky { background: linear-gradient(145deg, #7a4a10 0%, #3d2008 100%); }
+  .collection-bg-gin { background: linear-gradient(145deg, #1a4a28 0%, #0a2010 100%); }
+  .collection-bg-spirits { background: linear-gradient(145deg, #2a1a4a 0%, #100818 100%); }
+  .collection-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+  }
+  .collection-content { position: relative; z-index: 2; }
+  .collection-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+  }
+  .collection-name {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .collection-tile.large .collection-name { font-size: 2.5rem; }
+  .collection-count {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* Pairing Guide */
+  .pairing-section {
+    background: var(--dark);
+    padding: 96px 48px;
+  }
+  .pairing-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 96px;
+    align-items: center;
+  }
+  .pairing-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pairing-eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--gold);
+  }
+  .pairing-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .pairing-body {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.75;
+    margin-bottom: 40px;
+    max-width: 420px;
+  }
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 32px;
+    background: var(--gold);
+    color: var(--dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+  .btn-gold:hover { background: #d4a84e; transform: translateY(-1px); }
+  .pairing-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .pairing-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+    padding: 32px 28px;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+  .pairing-card:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(191,145,65,0.3);
+    transform: translateY(-2px);
+  }
+  .pairing-card-emoji {
+    font-size: 2rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .pairing-card-title {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .pairing-card-desc {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.6;
+  }
+
+  /* Trust Section */
+  .trust-section {
+    background: var(--cream);
+    padding: 96px 48px;
+  }
+  .trust-inner { max-width: 1400px; margin: 0 auto; }
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 48px;
+  }
+  .trust-item { text-align: center; }
+  .trust-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 24px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--wine);
+  }
+  .trust-title {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 10px;
+  }
+  .trust-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* Newsletter */
+  .newsletter-section {
+    background: var(--wine);
+    padding: 96px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .newsletter-section::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .newsletter-section::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  .newsletter-inner { max-width: 640px; margin: 0 auto; position: relative; z-index: 2; }
+  .newsletter-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 16px;
+  }
+  .newsletter-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .newsletter-body {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .newsletter-form {
+    display: flex;
+    gap: 8px;
+    max-width: 480px;
+    margin: 0 auto 16px;
+  }
+  .newsletter-input {
+    flex: 1;
+    padding: 14px 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius);
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    color: var(--white);
+    outline: none;
+    transition: border-color var(--transition);
+  }
+  .newsletter-input::placeholder { color: rgba(255,255,255,0.45); }
+  .newsletter-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); }
+  .btn-newsletter {
+    padding: 14px 28px;
+    background: var(--white);
+    color: var(--wine);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .btn-newsletter:hover { background: var(--dark); color: var(--white); }
+  .newsletter-disclaimer {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+  }
+  .newsletter-success {
+    display: none;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius);
+    color: var(--white);
+    font-size: 0.9rem;
+    margin-top: 16px;
+  }
+  .newsletter-success.show { display: block; }
+
+  /* Footer */
+  .footer {
+    background: var(--dark);
+    padding: 80px 48px 0;
+  }
+  .footer-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 64px;
+    padding-bottom: 64px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .footer-logo {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .footer-logo span { color: var(--wine); }
+  .footer-tagline {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 260px;
+  }
+  .footer-socials { display: flex; gap: 12px; }
+  .social-btn {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.5);
+    transition: all var(--transition);
+  }
+  .social-btn:hover { border-color: var(--wine); color: var(--white); background: var(--wine); }
+  .footer-col-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 20px;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .footer-links a {
+    font-size: 0.875rem;
+    color: rgba(255,255,255,0.55);
+    transition: color var(--transition);
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom {
+    padding: 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-copyright {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.3);
+  }
+  .footer-age-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+  }
+  .footer-age-badge strong {
+    color: var(--white);
+    font-size: 0.9rem;
+  }
+
+  /* Cart Drawer */
+  .cart-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(14,12,10,0.6);
+    z-index: 800;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition);
+  }
+  .cart-overlay.open { opacity: 1; visibility: visible; }
+  .cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 420px;
+    max-width: 100vw;
+    background: var(--white);
+    z-index: 900;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -20px 0 60px rgba(14,12,10,0.15);
+  }
+  .cart-drawer.open { transform: translateX(0); }
+  .cart-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .cart-header-title {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .cart-close-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    color: var(--muted);
+    transition: all var(--transition);
+  }
+  .cart-close-btn:hover { background: var(--cream); color: var(--dark); }
+  .cart-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+  .cart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    padding: 48px 0;
+    gap: 16px;
+  }
+  .cart-empty svg { color: var(--border); }
+  .cart-empty p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    max-width: 240px;
+    line-height: 1.6;
+  }
+  .cart-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-item-img {
+    width: 64px;
+    height: 80px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .cart-item-details { flex: 1; }
+  .cart-item-name {
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 2px;
+  }
+  .cart-item-variant {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .qty-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--dark);
+    transition: all var(--transition);
+  }
+  .qty-btn:hover { border-color: var(--wine); color: var(--wine); }
+  .qty-value { font-size: 0.88rem; font-weight: 600; min-width: 20px; text-align: center; }
+  .cart-item-price {
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark);
+    align-self: flex-start;
+  }
+  .cart-item-remove {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color var(--transition);
+  }
+  .cart-item-remove:hover { color: var(--wine); }
+  .cart-footer {
+    padding: 24px 28px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--cream);
+  }
+  .cart-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+  }
+  .cart-subtotal-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .cart-subtotal-amount {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .btn-checkout {
+    width: 100%;
+    padding: 16px;
+    background: var(--dark);
+    color: var(--white);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    transition: background var(--transition);
+  }
+  .btn-checkout:hover { background: var(--wine); }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { max-width: 100%; padding: 80px 48px; }
+    .hero-right { min-height: 50vh; }
+    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .trust-grid { grid-template-columns: repeat(2, 1fr); }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .sommelier-header-grid { grid-template-columns: 1fr; gap: 32px; }
+    .pairing-inner { grid-template-columns: 1fr; gap: 48px; }
+  }
+  @media (max-width: 768px) {
+    .nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero-left { padding: 60px 20px; }
+    .journal-feature-grid { grid-template-columns: 1fr; }
+    .journal-grid { grid-template-columns: 1fr; }
+    .products-grid { grid-template-columns: 1fr; }
+    .collections-grid { grid-template-columns: 1fr; }
+    .collection-tile.large { grid-column: span 1; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .trust-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .journal-section, .sommelier-section, .collections-section,
+    .pairing-section, .trust-section, .newsletter-section, .footer { padding-left: 20px; padding-right: 20px; }
+    .newsletter-form { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Age Gate -->
+<div id="age-gate">
+  <div class="age-gate-inner">
+    <div class="age-gate-logo">Wine<span>Now</span></div>
+    <div class="age-gate-divider"></div>
+    <h2 class="age-gate-title">Are you of legal drinking age?</h2>
+    <p class="age-gate-text">You must be 18 years of age or older to enter this site. By clicking "Yes, I'm 18+", you confirm you are of legal drinking age in your country.</p>
+    <div class="age-gate-buttons">
+      <button class="btn-age-yes" id="age-yes">Yes, I'm 18+</button>
+      <button class="btn-age-no" id="age-no">No, take me back</button>
+    </div>
+    <p class="age-gate-disclaimer">By entering this site you agree to our Terms &amp; Conditions and Privacy Policy.</p>
+  </div>
+</div>
+
+<!-- Announcement Bar -->
+<div class="announcement-bar">
+  Free delivery on orders over R750 <span>·</span> Expert Sommelier Advice <span>·</span> Same-day dispatch before 2pm
+</div>
+
+<!-- Navigation -->
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Wine<span>Now</span></a>
+    <ul class="nav-links">
+      <li><a href="#collections">Collections</a></li>
+      <li><a href="#journal">Journal</a></li>
+      <li><a href="#pairings">Pairings</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#stockists">Stockists</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="nav-search-btn" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <button class="nav-cart-btn" id="cart-open-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        Cart
+        <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow">Sommelier's Autumn Edit</div>
+    <h1 class="hero-headline">The Art of the<br><em>Pour</em></h1>
+    <p class="hero-body">Discover wines and spirits chosen with intention — from storied South African estates to world-class distilleries. Every bottle a story. Every pour, an experience.</p>
+    <div class="hero-ctas">
+      <a href="#collections" class="btn-primary">
+        Explore the Collection
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+      <a href="#journal" class="btn-ghost">
+        Read the Journal
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-bottle-wrap">
+      <div class="hero-right-accent"></div>
+      <svg class="hero-bottle-svg" viewBox="0 0 120 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Bottle cap/foil -->
+        <rect x="44" y="0" width="32" height="8" rx="2" fill="rgba(191,145,65,0.6)"/>
+        <!-- Bottle neck -->
+        <rect x="46" y="8" width="28" height="2" fill="rgba(191,145,65,0.4)"/>
+        <path d="M46 10 L46 80 Q46 82 44 84 L38 96 Q36 100 36 108 L36 300 Q36 320 60 320 Q84 320 84 300 L84 108 Q84 100 82 96 L76 84 Q74 82 74 80 L74 10 Z" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <!-- Label area -->
+        <rect x="40" y="130" width="40" height="80" rx="1" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+        <!-- Label text lines -->
+        <rect x="46" y="145" width="28" height="1.5" rx="0.75" fill="rgba(255,255,255,0.2)"/>
+        <rect x="43" y="151" width="34" height="2.5" rx="1.25" fill="rgba(255,255,255,0.3)"/>
+        <rect x="46" y="158" width="28" height="1" rx="0.5" fill="rgba(255,255,255,0.15)"/>
+        <rect x="48" y="163" width="24" height="1" rx="0.5" fill="rgba(255,255,255,0.1)"/>
+        <rect x="48" y="170" width="24" height="1" rx="0.5" fill="rgba(255,255,255,0.1)"/>
+        <rect x="50" y="178" width="20" height="1" rx="0.5" fill="rgba(255,255,255,0.1)"/>
+        <rect x="44" y="193" width="32" height="1" rx="0.5" fill="rgba(191,145,65,0.3)"/>
+        <!-- Liquid shimmer inside bottle -->
+        <path d="M38 180 Q60 175 82 180 L82 300 Q82 318 60 318 Q38 318 38 300 Z" fill="rgba(122,31,43,0.3)"/>
+        <!-- Light reflection on bottle -->
+        <path d="M50 20 L50 280 Q51 285 52 280 L52 20 Z" fill="rgba(255,255,255,0.04)"/>
+        <!-- Bottom of bottle -->
+        <ellipse cx="60" cy="318" rx="24" ry="4" fill="rgba(255,255,255,0.05)"/>
+      </svg>
+      <div class="hero-right-accent"></div>
+      <div class="hero-right-text">
+        <p>Autumn 2025 · Curated by our sommelier</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-number">350<span>+</span></div>
+      <div class="stat-label">Wines &amp; Spirits</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">12</div>
+      <div class="stat-label">Wine Regions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">8<span>+</span></div>
+      <div class="stat-label">Years Expert Curation</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" style="font-size:1.8rem;">Same<span>-</span>Day</div>
+      <div class="stat-label">Delivery Available</div>
+    </div>
+  </div>
+</div>
+
+<!-- Journal Section -->
+<section class="journal-section" id="journal">
+  <div class="journal-inner">
+    <div class="section-header">
+      <h2 class="section-title">The Journal</h2>
+      <a href="#" class="section-link">
+        View all articles
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+    <div class="journal-feature-grid">
+      <div class="journal-feature">
+        <div class="journal-feature-content">
+          <span class="journal-tag">Pairing Guide</span>
+          <h3 class="journal-feature-title">The Perfect Autumn Pairing: Bold Reds Meet Slow-Cooked Comfort</h3>
+          <p class="journal-feature-excerpt">As the air cools and kitchens fill with the heady scent of braises and stews, the question isn't whether to open a bottle — it's which bottle deserves the moment. Our sommelier navigates the season's finest pairings.</p>
+          <a href="#" class="journal-read-more">
+            Read More 
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="journal-side-articles">
+        <div class="journal-side-card">
+          <span class="journal-tag">Regions</span>
+          <h4 class="journal-side-title">Understanding Terroir: Why Where Matters as Much as What</h4>
+          <p class="journal-side-meta">8 min read · Wine Education</p>
+        </div>
+        <div class="journal-side-card">
+          <span class="journal-tag">Spirits</span>
+          <h4 class="journal-side-title">Gin Renaissance: South Africa's World-Class Craft Distillers</h4>
+          <p class="journal-side-meta">6 min read · Craft Spirits</p>
+        </div>
+      </div>
+    </div>
+    <div class="journal-grid">
+      <div class="journal-card journal-card-bg-wine">
+        <div class="journal-card-content">
+          <span class="journal-tag">Regions</span>
+          <h4 class="journal-card-title">Cape Winelands: A Journey Through Stellenbosch</h4>
+        </div>
+      </div>
+      <div class="journal-card journal-card-bg-amber">
+        <div class="journal-card-content">
+          <span class="journal-tag">Whisky</span>
+          <h4 class="journal-card-title">Whisky 101: From Grain to Glass</h4>
+        </div>
+      </div>
+      <div class="journal-card journal-card-bg-purple">
+        <div class="journal-card-content">
+          <span class="journal-tag">Natural Wine</span>
+          <h4 class="journal-card-title">Natural Wine: Minimal Intervention, Maximum Expression</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sommelier's Selection -->
+<section class="sommelier-section" id="selection">
+  <div class="sommelier-inner">
+    <div class="sommelier-header-grid">
+      <div class="sommelier-card">
+        <div class="sommelier-quote-mark">"</div>
+        <p class="sommelier-quote">Wine is not about perfection. It is about the moment — the table, the light, the people. My job is to find the bottle that belongs in that story.</p>
+        <div class="sommelier-attribution">— Curated by our Head Sommelier</div>
+      </div>
+      <div>
+        <div class="sommelier-intro-eyebrow">Hand-Picked</div>
+        <h2 class="sommelier-intro-title">This Week's Selection</h2>
+        <p class="sommelier-intro-text">Each week our certified sommelier revisits our cellar and selects four expressions that speak to the season. No algorithms. No trends. Just taste, experience, and a genuine love of the vine.</p>
+      </div>
+    </div>
+    <div class="products-grid">
+
+      <!-- Product 1: Fairvalley Merlot -->
+      <div class="product-card">
+        <div class="product-image product-img-red">
+          <svg class="product-bottle-icon" viewBox="0 0 60 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="22" y="0" width="16" height="4" rx="1" fill="rgba(191,145,65,0.5)"/>
+            <path d="M23 4 L23 40 Q23 41 22 42 L19 48 Q18 50 18 55 L18 150 Q18 160 30 160 Q42 160 42 150 L42 55 Q42 50 41 48 L38 42 Q37 41 37 40 L37 4 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+            <rect x="20" y="65" width="20" height="40" rx="0.5" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+            <path d="M19 100 Q30 97 41 100 L41 150 Q41 159 30 159 Q19 159 19 150 Z" fill="rgba(100,20,35,0.4)"/>
+          </svg>
+        </div>
+        <div class="product-body">
+          <div class="product-category">Red Wine</div>
+          <div class="product-name">Fairvalley Fairtrade Merlot</div>
+          <div class="product-vintage">Paarl · Fairtrade Certified</div>
+          <p class="product-note">Velvety dark fruit with earthy undertones. Ripe plum, dark cherry and a whisper of vanilla on a silky, medium-bodied palate.</p>
+          <div class="product-pricing">
+            <span class="product-price-bottle">R195 <small style="font-size:0.7rem;font-weight:400;">/bottle</small></span>
+            <span class="product-price-glass">· R55/glass</span>
+          </div>
+          <button class="btn-add-cart" data-name="Fairvalley Merlot" data-price="195" data-variant="Bottle" data-img-class="product-img-red">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Add to Cellar
+          </button>
+        </div>
+      </div>
+
+      <!-- Product 2: Misty Cliffs Sauvignon Blanc -->
+      <div class="product-card">
+        <div class="product-image product-img-white">
+          <svg class="product-bottle-icon" viewBox="0 0 60 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="22" y="0" width="16" height="4" rx="1" fill="rgba(191,145,65,0.5)"/>
+            <path d="M23 4 L23 40 Q23 41 22 42 L19 48 Q18 50 18 55 L18 150 Q18 160 30 160 Q42 160 42 150 L42 55 Q42 50 41 48 L38 42 Q37 41 37 40 L37 4 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+            <rect x="20" y="65" width="20" height="40" rx="0.5" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+            <path d="M19 100 Q30 97 41 100 L41 150 Q41 159 30 159 Q19 159 19 150 Z" fill="rgba(200,180,80,0.3)"/>
+          </svg>
+        </div>
+        <div class="product-body">
+          <div class="product-category">White Wine</div>
+          <div class="product-name">Misty Cliffs Sauvignon Blanc</div>
+          <div class="product-vintage">Elgin Valley · Coastal</div>
+          <p class="product-note">Crisp coastal freshness with zesty citrus. Gooseberry, lime zest and a mineral backbone finish with elegant precision.</p>
+          <div class="product-pricing">
+            <span class="product-price-bottle">R220 <small style="font-size:0.7rem;font-weight:400;">/bottle</small></span>
+            <span class="product-price-glass">· R65/glass</span>
+          </div>
+          <button class="btn-add-cart" data-name="Misty Cliffs Sauvignon Blanc" data-price="220" data-variant="Bottle" data-img-class="product-img-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Add to Cellar
+          </button>
+        </div>
+      </div>
+
+      <!-- Product 3: Fairvalley Brut NV -->
+      <div class="product-card">
+        <div class="product-image product-img-sparkling">
+          <svg class="product-bottle-icon" viewBox="0 0 60 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="22" y="0" width="16" height="4" rx="1" fill="rgba(191,145,65,0.5)"/>
+            <path d="M23 4 L23 40 Q23 41 22 42 L19 48 Q18 50 18 55 L18 150 Q18 160 30 160 Q42 160 42 150 L42 55 Q42 50 41 48 L38 42 Q37 41 37 40 L37 4 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+            <rect x="20" y="65" width="20" height="40" rx="0.5" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+            <path d="M19 100 Q30 97 41 100 L41 150 Q41 159 30 159 Q19 159 19 150 Z" fill="rgba(180,200,220,0.2)"/>
+            <!-- Bubbles -->
+            <circle cx="26" cy="130" r="1" fill="rgba(255,255,255,0.2)"/>
+            <circle cx="33" cy="120" r="1.2" fill="rgba(255,255,255,0.15)"/>
+            <circle cx="29" cy="140" r="0.8" fill="rgba(255,255,255,0.2)"/>
+            <circle cx="36" cy="135" r="1" fill="rgba(255,255,255,0.15)"/>
+          </svg>
+        </div>
+        <div class="product-body">
+          <div class="product-category">Sparkling Wine</div>
+          <div class="product-name">Fairvalley Brut NV</div>
+          <div class="product-vintage">Western Cape · Méthode Cap Classique</div>
+          <p class="product-note">Elegant bubbles with fresh apple notes. Brioche, green apple and a creamy mousse with a refreshingly clean, dry finish.</p>
+          <div class="product-pricing">
+            <span class="product-price-bottle">R245 <small style="font-size:0.7rem;font-weight:400;">/bottle</small></span>
+            <span class="product-price-glass">· R75/glass</span>
+          </div>
+          <button class="btn-add-cart" data-name="Fairvalley Brut NV" data-price="245" data-variant="Bottle" data-img-class="product-img-sparkling">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Add to Cellar
+          </button>
+        </div>
+      </div>
+
+      <!-- Product 4: Glenfiddich 12yr -->
+      <div class="product-card">
+        <div class="product-image product-img-whisky">
+          <svg class="product-bottle-icon" viewBox="0 0 60 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Wider whisky bottle shape -->
+            <rect x="20" y="0" width="20" height="5" rx="1" fill="rgba(191,145,65,0.5)"/>
+            <path d="M22 5 L22 30 Q22 32 20 34 L17 42 Q16 46 16 52 L16 148 Q16 160 30 160 Q44 160 44 148 L44 52 Q44 46 43 42 L40 34 Q38 32 38 30 L38 5 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>
+            <rect x="18" y="62" width="24" height="48" rx="0.5" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+            <path d="M17 110 Q30 107 43 110 L43 148 Q43 158 30 158 Q17 158 17 148 Z" fill="rgba(160,90,20,0.4)"/>
+          </svg>
+        </div>
+        <div class="product-body">
+          <div class="product-category">Single Malt Whisky</div>
+          <div class="product-name">Glenfiddich 12 Year Old</div>
+          <div class="product-vintage">Speyside, Scotland · Single Malt</div>
+          <p class="product-note">Honey, fresh pears and subtle oak. A fresh and fruity expression with a hint of cream toffee on a long, smooth finish.</p>
+          <div class="product-pricing">
+            <span class="product-price-bottle">R85 <small style="font-size:0.7rem;font-weight:400;">/dram</small></span>
+          </div>
+          <button class="btn-add-cart" data-name="Glenfiddich 12yr" data-price="85" data-variant="Dram" data-img-class="product-img-whisky">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Add to Cellar
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Collections Grid -->
+<section class="collections-section" id="collections">
+  <div class="collections-inner">
+    <div class="section-header">
+      <h2 class="section-title">Browse by Category</h2>
+      <a href="#" class="section-link">
+        View all
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+    <div class="collections-grid">
+      <div class="collection-tile large collection-bg-red">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">Red Wine</div>
+          <div class="collection-count">128 expressions</div>
+        </div>
+      </div>
+      <div class="collection-tile collection-bg-white">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">White Wine</div>
+          <div class="collection-count">96 expressions</div>
+        </div>
+      </div>
+      <div class="collection-tile collection-bg-sparkling">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">Sparkling &amp; Rosé</div>
+          <div class="collection-count">44 expressions</div>
+        </div>
+      </div>
+      <div class="collection-tile collection-bg-whisky">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">Whisky</div>
+          <div class="collection-count">52 expressions</div>
+        </div>
+      </div>
+      <div class="collection-tile collection-bg-gin">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">Gin &amp; Botanicals</div>
+          <div class="collection-count">38 expressions</div>
+        </div>
+      </div>
+      <div class="collection-tile collection-bg-spirits">
+        <div class="collection-content">
+          <div class="collection-label">Category</div>
+          <div class="collection-name">Premium Spirits</div>
+          <div class="collection-count">60 expressions</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pairing Guide -->
+<section class="pairing-section" id="pairings">
+  <div class="pairing-inner">
+    <div>
+      <div class="pairing-eyebrow">The Cellar Guide</div>
+      <h2 class="pairing-title">Food. Wine.<br>The Perfect Union.</h2>
+      <p class="pairing-body">Pairing wine with food is one of life's great pleasures — and one of its most rewarding arts. Let our sommelier guide you through the fundamentals of matching flavour with flavour.</p>
+      <a href="#" class="btn-gold">
+        Explore Pairings
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+    <div class="pairing-cards">
+      <div class="pairing-card">
+        <span class="pairing-card-emoji">🥩</span>
+        <div class="pairing-card-title">Red Wine + Red Meat</div>
+        <p class="pairing-card-desc">Bold reds pair beautifully with slow-braised cuts. The tannins cut through the fat, lifting each bite.</p>
+      </div>
+      <div class="pairing-card">
+        <span class="pairing-card-emoji">🐟</span>
+        <div class="pairing-card-title">White Wine + Seafood</div>
+        <p class="pairing-card-desc">Crisp whites lift the delicate flavours of fresh fish. Acidity and salinity in perfect conversation.</p>
+      </div>
+      <div class="pairing-card">
+        <span class="pairing-card-emoji">🧀</span>
+        <div class="pairing-card-title">Sparkling + Cheese</div>
+        <p class="pairing-card-desc">Bubbles cut through rich, creamy cheeses perfectly. From brie to aged cheddar — effervescence resets the palate.</p>
+      </div>
+      <div class="pairing-card">
+        <span class="pairing-card-emoji">🍫</span>
+        <div class="pairing-card-title">Whisky + Chocolate</div>
+        <p class="pairing-card-desc">Smoky drams meet dark cocoa in perfect harmony. The sweetness of malt amplifies bittersweet notes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust Section -->
+<section class="trust-section" id="about">
+  <div class="trust-inner">
+    <div class="section-header" style="justify-content:center;text-align:center;display:block;margin-bottom:64px;">
+      <h2 class="section-title">Why Choose WineNow</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </div>
+        <div class="trust-title">Expert Curation</div>
+        <p class="trust-desc">Every bottle personally tasted and approved by our certified sommeliers before it earns a place in our cellar.</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <div class="trust-title">Responsible Service</div>
+        <p class="trust-desc">We take legal compliance and responsible drinking seriously. Age verification required on every order.</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <div class="trust-title">Secure Checkout</div>
+        <p class="trust-desc">Bank-level encryption on every transaction. Your payment details are always protected.</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <div class="trust-title">Fast Delivery</div>
+        <p class="trust-desc">Same-day delivery to Cape Town and surrounds for orders placed before 2pm. Next-day nationwide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter-section">
+  <div class="newsletter-inner">
+    <div class="newsletter-eyebrow">The Cellar Letter</div>
+    <h2 class="newsletter-title">Monthly Picks from<br>Our Sommelier</h2>
+    <p class="newsletter-body">Get exclusive access to new arrivals, tasting notes, pairing guides and members-only offers. Written by a real sommelier, for real wine lovers.</p>
+    <form class="newsletter-form" id="newsletter-form">
+      <input type="email" class="newsletter-input" placeholder="Your email address" required>
+      <button type="submit" class="btn-newsletter">Subscribe</button>
+    </form>
+    <div class="newsletter-success" id="newsletter-success">
+      Welcome to The Cellar Letter. Your first issue arrives this weekend — along with your 10% members discount.
+    </div>
+    <p class="newsletter-disclaimer">No spam. Unsubscribe anytime. Members get 10% off their first order.</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="stockists">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo">Wine<span>Now</span></div>
+        <p class="footer-tagline">Premium wines and spirits, curated by certified sommeliers. Delivered to your door across South Africa.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Facebook">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4l16 16M20 4L4 20"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Shop</div>
+        <ul class="footer-links">
+          <li><a href="#">Red Wine</a></li>
+          <li><a href="#">White Wine</a></li>
+          <li><a href="#">Sparkling</a></li>
+          <li><a href="#">Whisky</a></li>
+          <li><a href="#">Gin</a></li>
+          <li><a href="#">Premium Spirits</a></li>
+          <li><a href="#" style="color: var(--gold);">Sale</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Journal</div>
+        <ul class="footer-links">
+          <li><a href="#">Pairing Guides</a></li>
+          <li><a href="#">Wine Regions</a></li>
+          <li><a href="#">Tasting Notes</a></li>
+          <li><a href="#">Spirits Guide</a></li>
+          <li><a href="#">About Wine</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Service</div>
+        <ul class="footer-links">
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Delivery &amp; Returns</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Responsible Drinking</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copyright">&copy; 2025 WineNow. All rights reserved. Registered liquor retailer.</p>
+      <div class="footer-age-badge">
+        <strong>18+</strong> Only. Please enjoy responsibly.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cart-overlay"></div>
+
+<!-- Cart Drawer -->
+<div class="cart-drawer" id="cart-drawer">
+  <div class="cart-header">
+    <div class="cart-header-title">Your Cellar (<span id="cart-drawer-count">0</span>)</div>
+    <button class="cart-close-btn" id="cart-close-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div class="cart-body" id="cart-body">
+    <div class="cart-empty" id="cart-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:#E4DDD4">
+        <path d="M8 21c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2"/><path d="M12 3v7"/><path d="M8.5 7.5 12 3l3.5 4.5"/><path d="M3 10h18l-2 9H5z"/>
+      </svg>
+      <p>Your cellar is empty. Start exploring our collection and add something exceptional.</p>
+      <button class="btn-primary" style="font-size:0.72rem;padding:10px 20px;" onclick="closeCart()">Explore Collection</button>
+    </div>
+    <div id="cart-items"></div>
+  </div>
+  <div class="cart-footer" id="cart-footer" style="display:none;">
+    <div class="cart-subtotal">
+      <span class="cart-subtotal-label">Subtotal</span>
+      <span class="cart-subtotal-amount" id="cart-subtotal">R0</span>
+    </div>
+    <button class="btn-checkout">
+      Proceed to Checkout
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left:8px;"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ─── Age Gate ─────────────────────────────────────────────────────────────
+(function() {
+  const gate = document.getElementById('age-gate');
+  if (sessionStorage.getItem('wn_age_verified') === 'true') {
+    gate.classList.add('hidden');
+    return;
+  }
+  document.getElementById('age-yes').addEventListener('click', function() {
+    sessionStorage.setItem('wn_age_verified', 'true');
+    gate.classList.add('hidden');
+  });
+  document.getElementById('age-no').addEventListener('click', function() {
+    window.location.href = 'https://www.google.com';
+  });
+})();
+
+// ─── Navigation scroll effect ─────────────────────────────────────────────
+(function() {
+  const nav = document.getElementById('main-nav');
+  function onScroll() {
+    if (window.scrollY > 40) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+// ─── Smooth scroll for nav links ──────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    var href = this.getAttribute('href');
+    if (href === '#') return;
+    var target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      var navH = document.getElementById('main-nav').offsetHeight;
+      var annoH = document.querySelector('.announcement-bar').offsetHeight;
+      var top = target.getBoundingClientRect().top + window.scrollY - navH - annoH;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  });
+});
+
+// ─── Cart State ────────────────────────────────────────────────────────────
+var cart = [];
+
+function getCartCount() {
+  return cart.reduce(function(sum, item) { return sum + item.qty; }, 0);
+}
+
+function getCartSubtotal() {
+  return cart.reduce(function(sum, item) { return sum + item.price * item.qty; }, 0);
+}
+
+function updateCartUI() {
+  var count = getCartCount();
+  document.getElementById('cart-count').textContent = count;
+  document.getElementById('cart-drawer-count').textContent = count;
+  document.getElementById('cart-subtotal').textContent = 'R' + getCartSubtotal().toLocaleString('en-ZA');
+
+  var isEmpty = cart.length === 0;
+  document.getElementById('cart-empty').style.display = isEmpty ? 'flex' : 'none';
+  document.getElementById('cart-footer').style.display = isEmpty ? 'none' : 'block';
+
+  renderCartItems();
+}
+
+function renderCartItems() {
+  var container = document.getElementById('cart-items');
+  container.innerHTML = '';
+  cart.forEach(function(item, idx) {
+    var div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = '<div class="cart-item-img ' + item.imgClass + '">' +
+      '<svg width="28" height="56" viewBox="0 0 60 120" fill="none">' +
+      '<path d="M23 4 L23 30 Q23 31 22 32 L19 38 Q18 40 18 44 L18 106 Q18 114 30 114 Q42 114 42 106 L42 44 Q42 40 41 38 L38 32 Q37 31 37 30 L37 4 Z" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5"/>' +
+      '</svg></div>' +
+      '<div class="cart-item-details">' +
+        '<div class="cart-item-name">' + item.name + '</div>' +
+        '<div class="cart-item-variant">' + item.variant + '</div>' +
+        '<div class="cart-item-controls">' +
+          '<button class="qty-btn" onclick="changeQty(' + idx + ', -1)">−</button>' +
+          '<span class="qty-value">' + item.qty + '</span>' +
+          '<button class="qty-btn" onclick="changeQty(' + idx + ', 1)">+</button>' +
+          '<span class="cart-item-remove" onclick="removeItem(' + idx + ')">Remove</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cart-item-price">R' + (item.price * item.qty) + '</div>';
+    container.appendChild(div);
+  });
+}
+
+function changeQty(idx, delta) {
+  if (!cart[idx]) return;
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) {
+    cart.splice(idx, 1);
+  }
+  updateCartUI();
+}
+
+function removeItem(idx) {
+  cart.splice(idx, 1);
+  updateCartUI();
+}
+
+// ─── Cart Open / Close ─────────────────────────────────────────────────────
+var cartDrawer = document.getElementById('cart-drawer');
+var cartOverlay = document.getElementById('cart-overlay');
+
+function openCart() {
+  cartDrawer.classList.add('open');
+  cartOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  cartDrawer.classList.remove('open');
+  cartOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('cart-open-btn').addEventListener('click', openCart);
+document.getElementById('cart-close-btn').addEventListener('click', closeCart);
+cartOverlay.addEventListener('click', closeCart);
+
+// ─── Add to Cart ───────────────────────────────────────────────────────────
+document.querySelectorAll('.btn-add-cart').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var name = this.dataset.name;
+    var price = parseFloat(this.dataset.price);
+    var variant = this.dataset.variant;
+    var imgClass = this.dataset.imgClass;
+
+    var existing = cart.find(function(i) { return i.name === name && i.variant === variant; });
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ name: name, price: price, variant: variant, imgClass: imgClass, qty: 1 });
+    }
+    updateCartUI();
+
+    // Button feedback
+    var origText = btn.innerHTML;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Added!';
+    btn.style.background = '#2d6a2d';
+    setTimeout(function() {
+      btn.innerHTML = origText;
+      btn.style.background = '';
+    }, 1500);
+
+    openCart();
+  });
+});
+
+// ─── Newsletter ────────────────────────────────────────────────────────────
+document.getElementById('newsletter-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  this.style.display = 'none';
+  document.getElementById('newsletter-success').classList.add('show');
+});
+
+// ─── Keyboard accessibility: close cart on Escape ─────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeCart();
+});
+</script>
+</body>
+</html>
