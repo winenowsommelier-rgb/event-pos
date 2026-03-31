@@ -26,5 +26,6 @@ This repository now includes a user-facing web app and a Vercel serverless API.
 ## Notes
 
 - Extraction in `api/process.js` uses a heuristic parser for text-style price lists.
+- Vercel serverless requests can fail with `HTTP 413` for large uploads. The frontend now enforces a per-file size guard (4MB) and uploads files one-by-one.
 - For scanned/image PDFs, add OCR (e.g., Tesseract or external OCR API) in the API function.
 - For supplier-specific table structures, extend `parseRowsFromText` with custom patterns.
